@@ -395,7 +395,7 @@ const accById = id => cfg.accounts.find(a => a.id === id);
 const accName = id => (accById(id) || {}).name || "?";
 const money = (a, cur) => cur === "USD" ? "$" + fmtN(a) : fmt(a);
 const toUzs = (a, cur) => cur === "USD" ? a * (+cfg.rate || 0) : a;
-const uzsOf = e => toUzs(e.a, e.cur);
+const uzsOf = e => e.cur === "USD" ? e.a * (+e.r || +cfg.rate || 0) : e.a;
 const mkOf = (y, m) => `${y}_${pad(m)}`;
 const allEntries = () => Object.values(DB).flat();
 function totals(E) {
@@ -404,7 +404,7 @@ function totals(E) {
   return { inc, exp };
 }
 const isDebt = id => { const a = accById(id); return !!(a && a.type === "debt"); };
-const debtPayUzs = E => E.reduce((s, e) => s + (e.k === "o" && isDebt(e.to) && !isDebt(e.acc) ? toUzs(e.a, e.cur) : 0), 0);
+const debtPayUzs = E => E.reduce((s, e) => s + (e.k === "o" && isDebt(e.to) && !isDebt(e.acc) ? uzsOf(e) : 0), 0);
 function dueList() {
   const now = new Date(), y = now.getFullYear(), m = now.getMonth() + 1, day = now.getDate();
   const mk = mkOf(y, m), b = balances(), out = [];
@@ -513,7 +513,7 @@ function renderReport() {
     <div class="kv"><span>Xarajat</span><b class="exp">${fmt(exp)}</b></div>
     ${pay ? `<div class="kv"><span>Qarz/nasiya to'lovlari</span><b class="exp">${fmt(pay)}</b></div>` : ""}
     <div class="kv total"><span>Oy natijasi</span><b>${sfmt(inc - exp - pay)}</b></div>
-    ${hasUsd ? `<p class="hint" style="margin:8px 0 0">Dollardagi summalar 1$ = ${fmt(cfg.rate)} so'm kursida hisoblangan.</p>` : ""}</section>`;
+    ${hasUsd ? `<p class="hint" style="margin:8px 0 0">Dollardagi yozuvlar kiritilgan kundagi kurs bo'yicha hisoblangan.</p>` : ""}</section>`;
   if (Object.keys(xc).length) h += `<section class="card"><h2>Xarajatlar</h2>${bars(xc, "exp")}</section>`;
   if (Object.keys(fam).length) h += `<section class="card"><h2>Oila a'zolari bo'yicha</h2>${bars(fam, "exp")}</section>`;
   const carNames = [...new Set([...cfg.cars, ...Object.keys(cars)])];
@@ -533,7 +533,7 @@ function carPL(E, car) {
       any = true; const v = uzsOf(e);
       const m = e.k === "t" ? inc : ONE_TIME.has(e.s) ? one : opx; m[e.s] = (m[e.s] || 0) + v;
     }
-    if (e.k === "o") { const d = accById(e.to); if (d && d.type === "debt" && d.car === car && !isDebt(e.acc)) { pay += toUzs(e.a, e.cur); any = true; } }
+    if (e.k === "o") { const d = accById(e.to); if (d && d.type === "debt" && d.car === car && !isDebt(e.acc)) { pay += uzsOf(e); any = true; } }
   }
   if (!any) return "";
   const sum = o => Object.values(o).reduce((a, b) => a + b, 0);
@@ -823,6 +823,7 @@ async function saveEntry() {
     const mode = itemMode(d);
     if (mode) { e.item = d.item; if (mode !== ITEM_CARGO) e.q = d.q; }
   }
+  if (e.cur === "USD" || (e.k === "o" && accById(e.to)?.cur === "USD")) e.r = +cfg.rate;
   (DB[mk] = DB[mk] || []).push(e);
   $("#save").disabled = true;
   try {
@@ -922,6 +923,7 @@ async function doImport() {
     const accObj = cols[8] ? newCfg.accounts.find(x => norm(x.name) === norm(cols[8])) : null;
     const acc = accObj ? accObj.id : "";
     const e = fixLegacy({ id: uid(), d, k, c, b, s: cols[4] || "Boshqa", a, cur, acc, n: cols[7] || "" });
+    if (cur === "USD") e.r = +newCfg.rate || +cfg.rate;
     if (cols[9]) e.item = cols[9];
     if (parseNum(cols[10]) > 0) e.q = parseNum(cols[10]);
     const key = keyOf(e);
