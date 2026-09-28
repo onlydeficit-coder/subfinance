@@ -169,6 +169,10 @@ details.bar .det .kv.sub b{font-weight:600}
 .it span{min-width:0}
 .it i{font-style:normal;opacity:.8}
 .it b{font-weight:500;color:var(--text);white-space:nowrap}
+.quick{display:flex;gap:8px;background:var(--bg);border-radius:14px;padding:6px 6px 6px 14px;margin-bottom:6px;align-items:center}
+.quick input{flex:1;border:0;background:transparent;outline:none;padding:8px 0;min-width:0}
+.quick button{width:42px;height:42px;border-radius:11px;background:var(--accent);color:var(--accent-text);font-size:18px;flex:none}
+.qhint{color:var(--hint);font-size:12px;margin:0 6px 10px}
 #toast{position:fixed;left:50%;bottom:84px;transform:translate(-50%,20px);background:rgba(20,20,24,.9);color:#fff;padding:9px 16px;border-radius:20px;font-size:14px;opacity:0;pointer-events:none;transition:.2s;z-index:9;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 #loading{text-align:center;color:var(--hint);padding:60px 20px}
@@ -195,6 +199,8 @@ details.bar .det .kv.sub b{font-weight:600}
       </div>
       <div class="lbl" id="payNote" style="margin-top:8px"></div>
     </section>
+    <div class="quick"><input id="quick" autocomplete="off" enterkeyhint="send" placeholder="Tez yozish: benzin 150000 uzum"><button data-act="quick" aria-label="Qo'shish">➤</button></div>
+    <p class="qhint">Klaviaturadagi 🎤 bilan gapiring yoki qisqa yozing. Ilova o'zi to'ldiradi, siz tekshirib Saqlash ni bosasiz.</p>
     <div id="dueBox"></div>
     <div class="actions">
       <button class="big exp" data-act="add-x">− Xarajat</button>
@@ -363,12 +369,36 @@ const CAR_T = ["Yandex Pro", "Shaxsiy yo'lovchi (naqd)", "Boshqa dostavka", "Bon
 const ONE_TIME = new Set(["Litsenziya va ruxsatnoma", "Sug'urta", "Texosmotr", "Hujjatlar"]);
 const LEGACY = { "Benzin": "Yoqilg'i", "Litsenziya": "Litsenziya va ruxsatnoma", "Yandex (taksi/dostavka)": "Yandex Pro", "Yandex dostavka": "Yandex Pro", "Yandex taksi": "Yandex Pro", "Ehtiyot qism": "Ta'mir va ehtiyot qism" };
 const fixLegacy = e => { if (e.c === "🚗 Mashina" && LEGACY[e.s]) e.s = LEGACY[e.s]; return e; };
-const ITEM_IN = "Tovar xaridi", ITEM_CARGO = "Kargo/tamojnya", ITEM_SALE = "Sotuv", ITEM_OWN = "Shaxsiy foydalanish";
-const ITEM_SUBS = [ITEM_IN, ITEM_CARGO, ITEM_SALE, ITEM_OWN];
-const BIZ_X = [ITEM_IN, ITEM_CARGO, "Reklama", "Yetkazish", "Xizmat haqi", "Komissiya", ITEM_OWN, "Boshqa"];
+const ITEM_IN = "Tovar xaridi", ITEM_CARGO = "Kargo/tamojnya", ITEM_SALE = "Sotuv", ITEM_OWN = "Shaxsiy foydalanish", ITEM_OPEN = "Boshlang'ich qoldiq";
+const ITEM_SUBS = [ITEM_IN, ITEM_CARGO, ITEM_SALE, ITEM_OWN, ITEM_OPEN];
+const BIZ_X = [ITEM_IN, ITEM_CARGO, "Reklama", "Yetkazish", "Xizmat haqi", "Komissiya", ITEM_OWN, ITEM_OPEN, "Boshqa"];
 const BIZ_T = [ITEM_SALE, "Boshqa"];
 
+const PRESETS = { asosiy: "Asosiy", ayol: "Ayollar uchun" };
+function treeAyol(kind) {
+  const KID = ["Kiyim-kechak", "Poyabzal", "Maktab/bog'cha", "O'quv qurollari", "To'garak/kurs", "O'yinchoq", "Dori-darmon", "Shirinlik/ovqat", "Cho'ntak puli", "Boshqa"];
+  const fam = {}; cfg.family.forEach(n => fam[n] = KID);
+  fam["Umumiy oila"] = ["Oilaviy sayr", "Sayohat", "Bayram", "Boshqa"];
+  const biz = {}; cfg.biz.forEach(b => biz[b] = kind === "x" ? BIZ_X : BIZ_T);
+  if (kind === "x") return {
+    "🛒 Oziq-ovqat": ["Bozor", "Supermarket", "Non va sut", "Meva-sabzavot", "Shirinliklar", "Tayyor ovqat", "Boshqa"],
+    "🏠 Uy-ro'zg'or": ["Xo'jalik mollari", "Tozalash vositalari", "Idish-tovoq", "Uy bezaklari", "Maishiy texnika", "Boshqa"],
+    [CAT.FAMILY]: fam,
+    "💄 O'zim": ["Kiyim", "Poyabzal", "Kosmetika", "Parvarish (soch, tirnoq)", "Salon", "Sog'liq/dori", "Sport/fitnes", "Kurs/o'qish", "Aksessuar", "Boshqa"],
+    "🎁 Sovg'a va marosim": ["To'y", "Tug'ilgan kun", "Mehmondorchilik", "Hayit/bayram", "Boshqa"],
+    "🚕 Transport": ["Taksi", "Jamoat transporti", "Boshqa"],
+    "📱 Aloqa": ["Telefon", "Internet", "Obunalar", "Boshqa"],
+    "💝 Xayriya": ["Sadaqa", "Boshqa"],
+    [CAT.BIZ]: biz,
+    "📌 Boshqa": ["Kutilmagan", "Boshqa"]
+  };
+  return {
+    [CAT.BIZ]: biz,
+    "💰 Boshqa tushumlar": ["Turmush o'rtog'imdan", "Oylik", "Sovg'a", "Qarz qaytarildi", "Boshqa"]
+  };
+}
 function tree(kind) {
+  if (cfg.preset === "ayol") return treeAyol(kind);
   const fam = {}; cfg.family.forEach(n => fam[n] = FAM_ITEMS);
   fam["Umumiy oila"] = ["To'y-marosim", "Sovg'a", "Sayohat", "Bayram", "Boshqa"];
   const cars = {}, biz = {};
@@ -437,7 +467,7 @@ function stock(biz) {
   for (const e of allEntries()) {
     if (!e.item || e.k === "o" || e.c !== CAT.BIZ || e.b !== biz) continue;
     const p = P[e.item] || (P[e.item] = { inQ: 0, outQ: 0, cost: 0 });
-    if (e.k === "x" && e.s === ITEM_IN) { p.inQ += +e.q || 0; p.cost += uzsOf(e); }
+    if (e.k === "x" && (e.s === ITEM_IN || e.s === ITEM_OPEN)) { p.inQ += +e.q || 0; p.cost += uzsOf(e); }
     else if (e.k === "x" && e.s === ITEM_CARGO) p.cost += uzsOf(e);
     else if (e.q) p.outQ += +e.q;
   }
@@ -580,14 +610,15 @@ function carPL(E, car) {
     <p class="hint" style="margin:8px 0 0">Operatsion foyda: mashinaning kundalik ishi o'zini oqlayaptimi. Qo'lga qolgan pul: litsenziya, sug'urta va nasiya to'lovidan keyin nima qolgani.</p></section>`;
 }
 function bizPL(E, biz) {
-  const S = stock(biz); let rev = 0, cogs = 0, buy = 0, own = 0, any = false; const opx = {}, sales = {};
+  const S = stock(biz); let rev = 0, cogs = 0, buy = 0, own = 0, openV = 0, any = false; const opx = {}, sales = {};
   for (const e of E) {
     if (e.k === "o" || e.c !== CAT.BIZ || e.b !== biz) continue;
     any = true; const v = uzsOf(e);
     if (e.k === "t") {
       rev += v;
       if (e.item) { sales[e.item] = (sales[e.item] || 0) + v; if (e.q && S[e.item]) cogs += S[e.item].avg * e.q; }
-    } else if (e.s === ITEM_IN || e.s === ITEM_CARGO) buy += v;
+    } else if (e.s === ITEM_OPEN) openV += v;
+    else if (e.s === ITEM_IN || e.s === ITEM_CARGO) buy += v;
     else if (e.s === ITEM_OWN) own += (e.item && S[e.item] && e.q) ? S[e.item].avg * e.q : v;
     else opx[e.s] = (opx[e.s] || 0) + v;
   }
@@ -605,6 +636,7 @@ function bizPL(E, biz) {
     <div class="kv total"><span>Sof foyda</span><b class="${np < 0 ? "exp" : "inc"}">${sfmt(np)}</b></div>
     ${buy ? `<div class="kv sub"><span>Omborga tovar olindi (xarajat emas)</span><b>${fmt(buy)}</b></div>` : ""}
     ${own ? `<div class="kv sub"><span>Shaxsiy foydalanishga olindi</span><b>${fmt(own)}</b></div>` : ""}
+    ${openV ? `<div class="kv sub"><span>Boshlang'ich ombor qoldig'i kiritildi</span><b>${fmt(openV)}</b></div>` : ""}
     ${rows.length ? `<h2 style="margin-top:14px">Ombor qoldig'i (hozir)</h2><div class="tbl"><table><thead><tr><th></th><th>Soni</th><th>Tannarx</th><th>Qiymat</th></tr></thead><tbody>${stockTbl}
       <tr><td><b>Jami</b></td><td></td><td></td><td><b>${fmt(total)}</b></td></tr></tbody></table></div>` : ""}
     <p class="hint" style="margin:8px 0 0">Tovar xaridi xarajat emas, omborga tushgan aktiv. Tannarx sotilganda hisobdan chiqadi (o'rtacha narx bo'yicha, kargo va tamojnya bilan).</p></section>`;
@@ -673,6 +705,7 @@ const accRow = a => {
 };
 function renderSettings() {
   $("#settings").innerHTML = `
+    <section class="card"><h2>Kategoriyalar shabloni</h2><select id="preset" style="width:100%;border:0;border-radius:9px;background:var(--bg2);padding:9px 10px">${Object.entries(PRESETS).map(([k, l]) => `<option value="${k}"${(cfg.preset || "asosiy") === k ? " selected" : ""}>${l}</option>`).join("")}</select></section>
     <section class="card"><h2>Dollar kursi</h2><div class="rate"><span>1$ =</span><input id="rate" inputmode="decimal" value="${cfg.rate}"><span>so'm</span></div></section>
     <section class="card"><h2>Hisoblar</h2><div id="accList">${cfg.accounts.map(accRow).join("")}</div>
       <button class="link" data-act="addacc">+ Hisob qo'shish</button>
@@ -703,7 +736,7 @@ async function saveCfg() {
     return { ...old, id: r.dataset.id, name: r.querySelector(".an").value.trim(), cur: r.querySelector(".ac").value, type, open: type === "debt" ? -ov : ov,
       monthly: parseNum(r.querySelector(".am").value), day: dd >= 1 && dd <= 31 ? dd : 0, car: r.querySelector(".acar").value, start: r.querySelector(".as").value };
   }).filter(a => a.name);
-  const next = { ...cfg, rate: parseNum($("#rate").value) || cfg.rate, accounts, family: read("famList"), cars: read("carList"), biz: read("bizList") };
+  const next = { ...cfg, preset: $("#preset").value, rate: parseNum($("#rate").value) || cfg.rate, accounts, family: read("famList"), cars: read("carList"), biz: read("bizList") };
   const prev = cfg; cfg = next;
   try { await saveCfgStore(); haptic("success"); toast("Saqlandi"); renderSettings(); }
   catch (e) { cfg = prev; toast("Saqlab bo'lmadi. Internetni tekshirib, qayta urinib ko'ring."); }
@@ -735,7 +768,7 @@ function openPay(id) {
   const pf = a.payFrom && cfg.accounts.find(x => norm(x.name) === norm(a.payFrom));
   if (pf) selectFrom(pf.id); else renderAdd();
 }
-function openAdd(kind) {
+function openAdd(kind, noFocus) {
   const now = new Date();
   const same = now.getFullYear() === view.y && now.getMonth() + 1 === view.m;
   const last = accById(cfg.lastAcc);
@@ -743,7 +776,7 @@ function openAdd(kind) {
   $("#amt").value = ""; $("#note").value = ""; $("#itemNew").value = ""; $("#qty").value = "";
   $("#date").value = same ? todayStr() : `${view.y}-${pad(view.m)}-01`;
   show("add");
-  setTimeout(() => $("#amt").focus(), 150);
+  if (!noFocus) setTimeout(() => $("#amt").focus(), 150);
 }
 function selectFrom(id) {
   const d = draft; d.from = id; d.cur = accById(id).cur; d.a2s = "";
@@ -811,7 +844,8 @@ function renderItem() {
   $("#qty").hidden = mode === ITEM_CARGO;
   const p = S[d.item];
   let hint = "";
-  if (mode === ITEM_IN) hint = "Summa: shu partiya uchun to'langan pul. Kargo alohida to'langan bo'lsa, uni \"Kargo/tamojnya\" bilan shu mahsulotga kiriting.";
+  if (mode === ITEM_OPEN) hint = "Hozir qo'lingizda bor tovar. Summa: shu tovarlarning jami tannarxi (necha pulga olingan). Hisob tanlanmaydi, chunki bu pul hozir sarflanmayapti.";
+  else if (mode === ITEM_IN) hint = "Summa: shu partiya uchun to'langan pul. Kargo alohida to'langan bo'lsa, uni \"Kargo/tamojnya\" bilan shu mahsulotga kiriting.";
   else if (mode === ITEM_CARGO) hint = "Bu summa tanlangan mahsulot tannarxiga qo'shiladi.";
   else if (p) hint = `Omborda: ${fmtN(p.left)} dona, tannarx ${fmt(p.avg)} so'm/dona.` + (mode === ITEM_OWN ? " Summa tannarx bo'yicha o'zi hisoblanadi." : "");
   if (mode === ITEM_SALE && p && d.q > p.left) hint += " Diqqat: omborda buncha tovar yo'q.";
@@ -848,7 +882,7 @@ async function saveEntry() {
     const p = d.path;
     e = { id: uid(), d: date, k: d.kind, c: p[0], b: p.length === 3 ? p[1] : "", s: p[p.length - 1], a, cur: d.cur, acc: d.acc, n: $("#note").value.trim() };
     const mode = itemMode(d);
-    if (mode) { e.item = d.item; if (mode !== ITEM_CARGO) e.q = d.q; }
+    if (mode) { e.item = d.item; if (mode !== ITEM_CARGO) e.q = d.q; if (mode === ITEM_OPEN) e.acc = ""; }
   }
   if (e.cur === "USD" || (e.k === "o" && accById(e.to)?.cur === "USD")) e.r = +cfg.rate;
   (DB[mk] = DB[mk] || []).push(e);
@@ -904,6 +938,8 @@ function parseDate(s) {
 function applyCfgLine(c, nc) {
   const cmd = norm(c[0].slice(1)), v = c[1] || "";
   const addTo = list => { if (v && !list.some(x => norm(x) === norm(v))) list.push(v); return !!v; };
+  if (cmd === "shablon") { if (PRESETS[v]) nc.preset = v; return !!PRESETS[v]; }
+  if (cmd === "hisob_ochir") { const i = nc.accounts.findIndex(x => norm(x.name) === norm(v)); if (i >= 0) nc.accounts.splice(i, 1); return i >= 0; }
   if (cmd === "kurs") { const r = parseNum(v); if (r > 0) nc.rate = r; return r > 0; }
   if (cmd === "oila") return addTo(nc.family);
   if (cmd === "mashina") return addTo(nc.cars);
@@ -971,6 +1007,155 @@ async function doImport() {
   } catch (e) { toast("Import to'liq saqlanmadi. Internetni tekshirib, qayta urinib ko'ring."); }
 }
 
+/* ================= TEZ YOZISH (ovoz/matn) ================= */
+const CYR = { "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "yo", "ж": "j", "з": "z", "и": "i", "й": "y", "к": "k", "л": "l", "м": "m", "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u", "ф": "f", "х": "x", "ц": "ts", "ч": "ch", "ш": "sh", "щ": "sh", "ъ": "", "ы": "y", "ь": "", "э": "e", "ю": "yu", "я": "ya", "ў": "o", "қ": "q", "ғ": "g", "ҳ": "h" };
+const lat = s => String(s || "").toLowerCase().replace(/[а-яёўқғҳ]/g, c => CYR[c] ?? c).replace(/[ʻʼ‘’`´']/g, "").replace(/(^|[^sc])h/g, "$1x");
+const NUMW = { bir: 1, ikki: 2, uch: 3, tort: 4, besh: 5, olti: 6, yetti: 7, sakkiz: 8, toqqiz: 9, on: 10, yigirma: 20, ottiz: 30, qirq: 40, ellik: 50, oltmish: 60, yetmish: 70, sakson: 80, toqson: 90, yuz: 100, ming: 1000, million: 1e6, milyon: 1e6, mln: 1e6, yarim: 0.5,
+  odin: 1, odna: 1, dva: 2, dve: 2, tri: 3, chetyre: 4, pyat: 5, shest: 6, sem: 7, vosem: 8, devyat: 9, desyat: 10, odinnadtsat: 11, dvenadtsat: 12, trinadtsat: 13, chetyrnadtsat: 14, pyatnadtsat: 15, shestnadtsat: 16, semnadtsat: 17, vosemnadtsat: 18, devyatnadtsat: 19,
+  dvadtsat: 20, tridtsat: 30, sorok: 40, pyatdesyat: 50, shestdesyat: 60, semdesyat: 70, vosemdesyat: 80, devyanosto: 90, sto: 100, dvesti: 200, trista: 300, chetyresta: 400, pyatsot: 500, shestsot: 600, semsot: 700, vosemsot: 800, devyatsot: 900,
+  tysyacha: 1000, tysyachi: 1000, tysyach: 1000, tys: 1000, milliona: 1e6, millionov: 1e6, poltora: 1.5 };
+const SYN = {
+  "Yoqilg'i": "benzin zapravka propan metan yoqilgi toplivo", "Ta'mir va ehtiyot qism": "remont tamir zapchast ehtiyot detal usta balon", "Texnik xizmat": "moy maslo filtr",
+  "Yuvish": "moyka yuvish", "Jarima": "jarima shtraf", "Park komissiyasi": "komissiya protsent foiz park", "Litsenziya va ruxsatnoma": "litsenziya razreshen", "Sug'urta": "sugurta straxovka osago", "Texosmotr": "texosmotr",
+  "Yandex Pro": "yandex yandeks", "Shaxsiy yo'lovchi (naqd)": "yolovchi passajir", "Bozor": "bozor rynok bazar", "Supermarket": "supermarket market magazin korzinka makro havas",
+  "Non va sut": "non sut xleb moloko", "Meva-sabzavot": "meva sabzavot frukt ovosh", "Shirinliklar": "shirinlik konfet shokolad", "Tayyor ovqat": "shashlik lavash somsa burger pitsa pizza shaurma",
+  "Kafe/restoran": "kafe restoran choyxona", "Yetkazib berish": "dostavka", "Elektr": "svet elektr", "Gaz": "gaz", "Internet": "internet wifi", "Telefon": "telefon paynet", "Kredit": "kredit", "Ijara": "ijara arenda",
+  "Obunalar": "obuna podpiska", "Ish haqi": "oylik zarplata maosh", "Kiyim": "kiyim odejda", "Kiyim-kechak": "kiyim odejda", "Poyabzal": "poyabzal oyoqkiyim obuv tufli krossovka",
+  "Dori-darmon": "dori apteka lekarstv", "Sog'liq": "doktor vrach shifokor", "Sog'liq/dori": "dori apteka lekarstv doktor vrach", "Maktab/bog'cha": "maktab shkola bogcha sadik",
+  "O'quv qurollari": "daftar ruchka kanstovar", "To'garak/kurs": "togarak kurs sektsiya", "O'yinchoq": "oyinchoq igrushk", "Cho'ntak puli": "chontak karmann", "Ovqat/shirinlik": "shirinlik shokolad konfet",
+  "Shirinlik/ovqat": "shirinlik shokolad konfet", "Sotuv": "sotdim sotuv sotildi prodal prodaj", "Tovar xaridi": "tovar partiya zakaz xarid", "Kargo/tamojnya": "kargo tamojn", "Reklama": "reklama",
+  "Kosmetika": "kosmetika krem pomada atir duxi", "Parvarish (soch, tirnoq)": "soch tirnoq manikyur pedikyur", "Salon": "salon", "Sport/fitnes": "sport fitnes", "Xo'jalik mollari": "xojalik poroshok sovun",
+  "Do'stlar uchun": "ortoq dost drug", "Taksi": "taksi taxi", "Transport/taksi": "taksi taxi metro avtobus", "Sadaqa": "sadaqa", "Xayriya": "xayriya sadaqa", "Qarz qaytarildi": "qaytardi qaytarildi",
+  "Turmush o'rtog'imdan": "erim", "Sovg'a": "sovga podarok", "To'y": "toy svadba", "Tug'ilgan kun": "tugilgan", "Shaxsiy": "shaxsiy"
+};
+const SYNL = {}; for (const [k, v] of Object.entries(SYN)) SYNL[k] = lat(v).split(" ");
+const STOP = new Set(["boshqa", "uchun", "umumiy", "yoki", "naqd", "karta"]);
+const awords = lab => lat(lab).split(/[^a-z0-9]+/).filter(w => w.length >= 3);
+const words = lab => lat(lab).split(/[^a-z0-9]+/).filter(w => w.length >= 3 && !STOP.has(w));
+function numVals(t) {
+  if (/^\d+([.,]\d+)?$/.test(t)) return [parseFloat(t.replace(",", "."))];
+  const m = t.match(/^(\d+(?:[.,]\d+)?)(k|ming|mln)$/);
+  if (m) return [parseFloat(m[1].replace(",", ".")), m[2] === "mln" ? 1e6 : 1000];
+  for (const w of [t, t.replace(/(ga|dan|lik|ni|dagi)$/, "")]) if (w in NUMW) return [NUMW[w]];
+  return null;
+}
+function groupValue(vals) {
+  let total = 0, cur = 0;
+  for (const v of vals) {
+    if (v >= 1000) { total += (cur || 1) * v; cur = 0; }
+    else if (v === 100) cur = (cur || 1) * 100;
+    else cur += v;
+  }
+  return total + cur;
+}
+function leafPaths(kind) {
+  const out = [];
+  const walk = (n, p) => { if (Array.isArray(n)) n.forEach(l => out.push([...p, l])); else Object.keys(n).forEach(k => walk(n[k], [...p, k])); };
+  walk(tree(kind), []);
+  return out;
+}
+function parseQuick(text) {
+  let s = lat(text), prev;
+  do { prev = s; s = s.replace(/(\d)[\s\u00a0.](\d{3})(?!\d)/g, "$1$2"); } while (s !== prev);
+  const isUsd = /\$|dollar|dollor|usd/.test(s);
+  const toks = s.split(/[^a-z0-9.,]+/).map(t => t.replace(/^[.,]+|[.,]+$/g, "")).filter(Boolean);
+  const used = new Set(), groups = []; let g = null;
+  toks.forEach((t, i) => {
+    const qm = t.match(/^(\d+)(ta|dona|sht)$/);
+    if (qm) { groups.push({ vals: [+qm[1]], qty: true }); used.add(i); g = null; return; }
+    if (/^(ta|dona|sht|shtuk|shtuki)$/.test(t) && g) { g.qty = true; used.add(i); g = null; return; }
+    const nv = numVals(t);
+    if (nv) { used.add(i); if (!g) { g = { vals: [], qty: false }; groups.push(g); } g.vals.push(...nv); return; }
+    if (/^(som|sum|sumov|dollar|dollor|dollara|usd)$/.test(t)) { used.add(i); g = null; return; }
+    g = null;
+  });
+  const amounts = groups.filter(x => !x.qty).map(x => groupValue(x.vals)).filter(v => v > 0);
+  const amount = amounts.length ? Math.max(...amounts) : 0;
+  const qg = groups.find(x => x.qty); const q = qg ? groupValue(qg.vals) : 0;
+  const ctoks = toks.filter((t, i) => !used.has(i));
+  const hitLen = kws => { let L = 0; for (const k of kws) if (k && ctoks.some(t => t.startsWith(k))) L = Math.max(L, k.length); return L; };
+  const hit = kws => hitLen(kws) > 0;
+  const has = re => ctoks.some(t => re.test(t));
+  // hisoblar
+  const accHits = [];
+  ctoks.forEach(t => {
+    for (const a of cfg.accounts) {
+      const w = awords(a.name).filter(x => !["karta", "karti", "card"].includes(x));
+      const keys = a.type === "debt" || a.type === "asset" ? w.concat(a.type === "debt" ? ["nasiya", "rassroch"] : []) : w.slice(0, 1);
+      if (w[0] === "naqd") keys.push("nalichn", "nalik", "kesh", "naxt");
+      if (keys.some(k => t.startsWith(k)) && !accHits.some(h => h.a.id === a.id)) accHits.push({ a, t });
+    }
+  });
+  const fixCur = a => { if (isUsd && a.cur !== "USD") { const alt = cfg.accounts.find(x => x.cur === "USD" && awords(x.name)[0] === awords(a.name)[0]); return alt || a; } return a; };
+  // o'tkazma
+  const moneyAcc = accHits.filter(h => !["asset"].includes(h.a.type));
+  const payers = accHits.filter(h => ["card", "cash", "invest", "recv"].includes(h.a.type));
+  const debtHit = accHits.find(h => h.a.type === "debt" && /^(nasiya|rassroch)/.test(h.t) || h.a.type === "debt" && has(/^(nasiya|rassroch|tolov)/));
+  if (debtHit && payers.length) return { kind: "o", amount, cur: isUsd ? "USD" : undefined, from: fixCur(payers[0].a).id, to: debtHit.a.id };
+  const dirWords = moneyAcc.some(h => /dan$/.test(h.t)) && moneyAcc.some(h => /(ga|ka|qa)$/.test(h.t));
+  if (moneyAcc.length >= 2 && (has(/^(otkaz|perevod|perevel|almashtir|obmen|yechdim|snyal|tashladim|toldirdim)/) || dirWords)) {
+    const from = moneyAcc.find(h => /dan$/.test(h.t)) || moneyAcc[0];
+    const to = moneyAcc.find(h => h !== from && /(ga|ka|qa)$/.test(h.t)) || moneyAcc.find(h => h !== from);
+    return { kind: "o", amount, cur: isUsd ? "USD" : undefined, from: fixCur(from.a).id, to: to.a.id };
+  }
+  // kategoriya
+  const best = kind => {
+    let score = 0, paths = [];
+    for (const p of leafPaths(kind)) {
+      let sc = 0, depth = 0;
+      p.forEach((lab, li) => {
+        const isLeaf = li === p.length - 1, isMid = p.length === 3 && li === 1;
+        const L = hitLen(words(lab).concat(isLeaf ? (SYNL[lab] || []) : []));
+        if (L) { sc += (isMid ? 3 : isLeaf ? 2 : 1) + L * 0.01; depth = li + 1; }
+      });
+      if (sc > score) { score = sc; paths = [{ p, depth }]; } else if (sc === score && sc > 0) paths.push({ p, depth });
+    }
+    let path = [];
+    if (paths.length) {
+      path = paths[0].p.slice();
+      for (const x of paths) { let i = 0; while (i < path.length && x.p[i] === path[i]) i++; path = path.slice(0, i); }
+      path = path.slice(0, Math.max(...paths.map(x => x.depth)));
+    }
+    return { score, path };
+  };
+  const incomeWord = has(/^(tushum|kirim|keldi|tushdi|sotdim|sotildi|oylik|zarplata|maosh|poluchil|doxod|prixod|ishladim|ishlandi)/);
+  const bx = best("x"), bt = best("t");
+  let kind = (bt.score + (incomeWord ? 3 : 0)) > bx.score ? "t" : "x";
+  let path = kind === "t" ? bt.path : bx.path, item = "";
+  // biznes mahsuloti
+  for (const b of cfg.biz) for (const name of Object.keys(stock(b))) {
+    if (!item && hit(words(name))) {
+      item = name;
+      const buy = has(/^(tovar|partiya|zakaz|xarid|kupil)/);
+      kind = buy ? "x" : "t";
+      path = [CAT.BIZ, b, buy ? ITEM_IN : ITEM_SALE];
+    }
+  }
+  const allowed = accHits.filter(h => ["card", "cash", "invest", "recv"].includes(h.a.type));
+  let acc = allowed.length ? fixCur(allowed[0].a) : null;
+  if (acc && isUsd && acc.cur !== "USD") acc = null;
+  return { kind, amount, cur: isUsd ? "USD" : (acc ? acc.cur : undefined), acc: acc ? acc.id : null, path, item, q };
+}
+function applyQuick() {
+  const text = $("#quick").value.trim(); if (!text) return;
+  const r = parseQuick(text);
+  openAdd(r.kind, true);
+  const d = draft;
+  if (r.kind === "o") { d.to = r.to; selectFrom(r.from); }
+  else {
+    if (r.acc) { d.acc = r.acc; d.cur = accById(r.acc).cur; } else if (r.cur === "USD") { d.acc = ""; d.cur = "USD"; }
+    d.path = r.path || [];
+    if (r.item) d.item = r.item;
+    if (r.q) { d.q = r.q; $("#qty").value = String(r.q); }
+  }
+  if (r.amount) $("#amt").value = cleanNum(String(r.amount), true);
+  $("#note").value = text;
+  syncAmt(); renderAdd();
+  $("#quick").value = "";
+  const done = r.kind === "o" || (resolve(d.kind, d.path) || {}).leaf;
+  toast(!r.amount ? "Summani kiriting" : done ? "Tekshiring va Saqlash ni bosing" : "Kategoriyani tanlang");
+}
+
 /* ================= HODISALAR ================= */
 document.addEventListener("click", ev => {
   const t = ev.target.closest("button"); if (!t) return;
@@ -1008,6 +1193,7 @@ document.addEventListener("click", ev => {
   if (a === "savecfg") return saveCfg();
   if (a === "import") return doImport();
   if (a === "reset") return resetAll();
+  if (a === "quick") return applyQuick();
 });
 document.addEventListener("input", ev => {
   if (ev.target.id === "amt") { syncAmt(); updateSave(); }
@@ -1032,6 +1218,7 @@ document.addEventListener("change", ev => {
   r.readAsText(ev.target.files[0]);
 });
 $("#amt").addEventListener("keydown", ev => { if (ev.key === "Enter") ev.target.blur(); });
+$("#quick").addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); applyQuick(); } });
 if (ver("6.1")) tg.BackButton.onClick(() => show("home"));
 
 (async () => {
