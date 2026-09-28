@@ -706,6 +706,7 @@ const accRow = a => {
 };
 function renderSettings() {
   $("#settings").innerHTML = `
+    ${inTg && tg.initDataUnsafe && tg.initDataUnsafe.user ? `<section class="card"><h2>Telegram ID</h2><div class="kv" style="padding:0"><span>Eslatmalar uchun kerak</span><b style="user-select:all">${tg.initDataUnsafe.user.id}</b></div></section>` : ""}
     <section class="card"><h2>Kategoriyalar shabloni</h2><select id="preset" style="width:100%;border:0;border-radius:9px;background:var(--bg2);padding:9px 10px">${Object.entries(PRESETS).map(([k, l]) => `<option value="${k}"${(cfg.preset || "asosiy") === k ? " selected" : ""}>${l}</option>`).join("")}</select></section>
     <section class="card"><h2>Dollar kursi</h2><div class="rate"><span>1$ =</span><input id="rate" inputmode="decimal" value="${cfg.rate}"><span>so'm</span></div></section>
     <section class="card"><h2>Hisoblar</h2><div id="accList">${cfg.accounts.map(accRow).join("")}</div>
@@ -1018,7 +1019,7 @@ const NUMW = { bir: 1, ikki: 2, uch: 3, tort: 4, besh: 5, olti: 6, yetti: 7, sak
 const SYN = {
   "Yoqilg'i": "benzin zapravka propan metan yoqilgi toplivo", "Ta'mir va ehtiyot qism": "remont tamir zapchast ehtiyot detal usta balon", "Texnik xizmat": "moy maslo filtr",
   "Yuvish": "moyka yuvish", "Jarima": "jarima shtraf", "Park komissiyasi": "komissiya protsent foiz park", "Litsenziya va ruxsatnoma": "litsenziya razreshen", "Sug'urta": "sugurta straxovka osago", "Texosmotr": "texosmotr",
-  "Yandex Pro": "yandex yandeks", "Shaxsiy yo'lovchi (naqd)": "yolovchi passajir", "Bozor": "bozor rynok bazar", "Supermarket": "supermarket market magazin korzinka makro havas",
+  "Yandex Pro": "yandex yandeks", "Shaxsiy yo'lovchi (naqd)": "yolovchi passajir", "Bozor": "bozor rynok bazar", "Supermarket": "supermarket market magazin korzinka makro havas produkt oziqovqat",
   "Non va sut": "non sut xleb moloko", "Meva-sabzavot": "meva sabzavot frukt ovosh", "Shirinliklar": "shirinlik konfet shokolad", "Tayyor ovqat": "shashlik lavash somsa burger pitsa pizza shaurma",
   "Kafe/restoran": "kafe restoran choyxona", "Yetkazib berish": "dostavka", "Elektr": "svet elektr", "Gaz": "gaz", "Internet": "internet wifi", "Telefon": "telefon paynet", "Kredit": "kredit", "Ijara": "ijara arenda",
   "Obunalar": "obuna podpiska", "Ish haqi": "oylik zarplata maosh", "Kiyim": "kiyim odejda", "Kiyim-kechak": "kiyim odejda", "Poyabzal": "poyabzal oyoqkiyim obuv tufli krossovka",
@@ -1030,7 +1031,7 @@ const SYN = {
   "Turmush o'rtog'imdan": "erim", "Sovg'a": "sovga podarok", "To'y": "toy svadba", "Tug'ilgan kun": "tugilgan", "Shaxsiy": "shaxsiy"
 };
 const SYNL = {}; for (const [k, v] of Object.entries(SYN)) SYNL[k] = lat(v).split(" ");
-const STOP = new Set(["boshqa", "uchun", "umumiy", "yoki", "naqd", "karta"]);
+const STOP = new Set(["boshqa", "uchun", "umumiy", "yoki", "naqd", "karta", "pro", "va"]);
 const awords = lab => lat(lab).split(/[^a-z0-9]+/).filter(w => w.length >= 3);
 const words = lab => lat(lab).split(/[^a-z0-9]+/).filter(w => w.length >= 3 && !STOP.has(w));
 function numVals(t) {
