@@ -199,8 +199,8 @@ details.bar .det .kv.sub b{font-weight:600}
       </div>
       <div class="lbl" id="payNote" style="margin-top:8px"></div>
     </section>
-    <div class="quick"><input id="quick" autocomplete="off" enterkeyhint="send" placeholder="Tez yozish: benzin 150000 uzum"><button data-act="quick" aria-label="Qo'shish">➤</button></div>
-    <p class="qhint">Klaviaturadagi 🎤 bilan gapiring yoki qisqa yozing. Ilova o'zi to'ldiradi, siz tekshirib Saqlash ni bosasiz.</p>
+    <div class="quick"><input id="quick" autocomplete="off" enterkeyhint="send" placeholder="Nima uchun, qancha, qaysi hisobdan"><button data-act="quick" aria-label="Qo'shish">➤</button></div>
+    <p class="qhint" id="qhint">Bir gap bilan yozing yoki 🎤 bilan ayting: <b>nima uchun · qancha · qaysi hisobdan</b>. Ilova o'zi to'ldiradi, siz faqat tekshirib saqlaysiz.</p>
     <div id="dueBox"></div>
     <div class="actions">
       <button class="big exp" data-act="add-x">− Xarajat</button>
@@ -517,6 +517,7 @@ function renderHome() {
   $("#bal").textContent = sfmt(res);
   $("#bal").className = "bal" + (res < 0 ? " neg" : "");
   $("#sumInc").textContent = fmt(inc); $("#sumExp").textContent = fmt(exp);
+  $("#qhint").hidden = allEntries().length >= 15;
   $("#payNote").textContent = pay ? `Qarz/nasiya to'lovlari: ${fmt(pay)} so'm` : "";
   $("#dueBox").innerHTML = dueList().map(d => `<div class="due${d.late ? " late" : ""}"><span><b>${esc(d.a.name)}: ${money(d.left, d.a.cur)}</b><small>${d.late ? "Muddati o'tgan" : "To'lov sanasi"}: ${d.date}</small></span><button data-act="pay" data-id="${esc(d.a.id)}">To'lash</button></div>`).join("");
   if (!E.length) { $("#list").innerHTML = `<p class="empty">Bu oyda hali yozuv yo'q. Yuqoridagi tugmalar bilan birinchisini qo'shing.</p>`; return; }
@@ -1156,6 +1157,16 @@ function applyQuick() {
   toast(!r.amount ? "Summani kiriting" : done ? "Tekshiring va Saqlash ni bosing" : "Kategoriyani tanlang");
 }
 
+const QEX = {
+  asosiy: ["benzin 150 ming uzum", "non 12000 naqd", "oylik 7 mln kapitalga", "internet 99 000 ipakdan", "uzumdan naqdga 500 ming"],
+  ayol: ["non 12000 naqd", "kosmetika 65 ming uzum", "bolalarga kiyim 200 ming", "D3K2 2 ta 170 ming sotdim", "taksi 25000 naqd"]
+};
+let qexI = 0;
+setInterval(() => {
+  const q = $("#quick"); if (!q || document.activeElement === q || q.value) return;
+  const list = QEX[cfg.preset] || QEX.asosiy; qexI = (qexI + 1) % list.length;
+  q.placeholder = "Masalan: " + list[qexI];
+}, 3500);
 /* ================= HODISALAR ================= */
 document.addEventListener("click", ev => {
   const t = ev.target.closest("button"); if (!t) return;
