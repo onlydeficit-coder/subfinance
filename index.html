@@ -706,7 +706,14 @@ const accRow = a => {
 };
 function renderSettings() {
   $("#settings").innerHTML = `
-    ${inTg && tg.initDataUnsafe && tg.initDataUnsafe.user ? `<section class="card"><h2>Telegram ID</h2><div class="kv" style="padding:0"><span>Eslatmalar uchun kerak</span><b style="user-select:all">${tg.initDataUnsafe.user.id}</b></div></section>` : ""}
+    <section class="card"><h2>🔔 Eslatmalar</h2>
+      <div class="kv" style="align-items:center"><span>Kunlik eslatma</span><select id="remHour" style="border:0;border-radius:9px;background:var(--bg2);padding:8px 10px">
+        <option value="0"${(cfg.remind?.hour ?? 21) === 0 ? " selected" : ""}>O'chirilgan</option>
+        ${Array.from({ length: 18 }, (_, i) => i + 6).map(h => `<option value="${h}"${(cfg.remind?.hour ?? 21) === h ? " selected" : ""}>${pad(h)}:00</option>`).join("")}
+      </select></div>
+      <label class="kv" style="align-items:center"><span>Qarz/nasiya to'lov kunlarida eslatish</span><input type="checkbox" id="remPay"${cfg.remind?.pay === false ? "" : " checked"} style="width:20px;height:20px"></label>
+      <button class="secondary" data-act="remind" style="margin-top:8px;background:var(--bg2)">Saqlash va botga yuborish</button>
+      <p class="hint" style="margin:6px 0 0">Bot chati ochiladi. «Start» yoki «Запустить» tugmasi chiqsa, bosing. Bot bir soat ichida tasdiq xabarini yuboradi.</p></section>
     <section class="card"><h2>Kategoriyalar shabloni</h2><select id="preset" style="width:100%;border:0;border-radius:9px;background:var(--bg2);padding:9px 10px">${Object.entries(PRESETS).map(([k, l]) => `<option value="${k}"${(cfg.preset || "asosiy") === k ? " selected" : ""}>${l}</option>`).join("")}</select></section>
     <section class="card"><h2>Dollar kursi</h2><div class="rate"><span>1$ =</span><input id="rate" inputmode="decimal" value="${cfg.rate}"><span>so'm</span></div></section>
     <section class="card"><h2>Hisoblar</h2><div id="accList">${cfg.accounts.map(accRow).join("")}</div>
@@ -752,6 +759,14 @@ async function saveVal(id) {
   catch (e) { a.val = prev; toast("Saqlab bo'lmadi."); }
 }
 
+const BOT_USERNAME = "subfinancebot";
+function sendRemind() {
+  const h = +$("#remHour").value, pay = $("#remPay").checked;
+  const days = pay ? [...new Set(cfg.accounts.filter(a => a.type === "debt" && a.day && (-(balances()[a.id] || 0) > 0.001)).map(a => a.day))] : [];
+  cfg.remind = { hour: h, pay }; saveCfgStore().catch(() => {});
+  const link = `https://t.me/${BOT_USERNAME}?start=e${h}${days.map(d => "p" + d).join("")}`;
+  if (inTg && tg.openTelegramLink) tg.openTelegramLink(link); else window.open(link, "_blank");
+}
 async function resetAll() {
   if (!await ask("Barcha yozuvlar va sozlamalar o'chiriladi. Davom etasizmi?")) return;
   if (!await ask("Rostdan ham? Bu amalni qaytarib bo'lmaydi.")) return;
@@ -1205,6 +1220,7 @@ document.addEventListener("click", ev => {
   if (a === "savecfg") return saveCfg();
   if (a === "import") return doImport();
   if (a === "reset") return resetAll();
+  if (a === "remind") return sendRemind();
   if (a === "quick") return applyQuick();
 });
 document.addEventListener("input", ev => {
