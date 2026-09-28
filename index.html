@@ -173,6 +173,29 @@ details.bar .det .kv.sub b{font-weight:600}
 .quick input{flex:1;border:0;background:transparent;outline:none;padding:8px 0;min-width:0}
 .quick button{width:42px;height:42px;border-radius:11px;background:var(--accent);color:var(--accent-text);font-size:18px;flex:none}
 .qhint{color:var(--hint);font-size:12px;margin:0 6px 10px}
+:root[data-preset="ayol"]{--accent:#d65a8e;--accent-text:#ffffff;--tr:#9a6fd8}
+:root[data-preset="ayol"] .summary{background:linear-gradient(135deg,rgba(214,90,142,.16),rgba(154,111,216,.10)),var(--bg)}
+:root[data-preset="ayol"] .big.exp{background:#d9607a} :root[data-preset="ayol"] .big.inc{background:#3aa77a}
+.track i.warn{background:#e0a030}
+.lim{margin-bottom:12px}
+.lim .bl b small{color:var(--hint);font-weight:400}
+.lhint{display:block;color:var(--hint);font-size:12px;margin-top:3px}
+.due.low{border-left-color:#e0a030}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.tile{background:var(--bg2);border-radius:10px;padding:8px 10px;font-size:13px;color:var(--hint)}
+.tile b{display:block;font-size:15px;color:var(--text);margin-top:2px}
+.limin{width:130px;text-align:right;border:0;border-radius:9px;background:var(--bg2);padding:8px 10px}
+.gtitle{display:flex;justify-content:space-between;align-items:center}
+.gtitle h2{margin:0 0 8px}
+.gdel{color:var(--hint);width:32px;height:32px}
+.gnext{background:var(--bg2);border-radius:12px;padding:12px 14px;margin-bottom:10px;line-height:1.5}
+.gnext.me{background:linear-gradient(135deg,rgba(214,90,142,.18),rgba(154,111,216,.14))}
+.gtl summary{cursor:pointer;color:var(--accent);font-weight:500;padding:4px 0}
+.grow{display:grid;grid-template-columns:1.1fr 1.4fr 28px;gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
+.grow.me{font-weight:600}
+.grow b{text-align:right}
+.gform input,.gform select,.gform textarea{width:100%;border:0;border-radius:9px;background:var(--bg2);padding:10px;margin-bottom:8px;outline:none}
+.gform .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 #toast{position:fixed;left:50%;bottom:84px;transform:translate(-50%,20px);background:rgba(20,20,24,.9);color:#fff;padding:9px 16px;border-radius:20px;font-size:14px;opacity:0;pointer-events:none;transition:.2s;z-index:9;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 #loading{text-align:center;color:var(--hint);padding:60px 20px}
@@ -202,16 +225,20 @@ details.bar .det .kv.sub b{font-weight:600}
     <div class="quick"><input id="quick" autocomplete="off" enterkeyhint="send" placeholder="Nima uchun, qancha, qaysi hisobdan"><button data-act="quick" aria-label="Qo'shish">➤</button></div>
     <p class="qhint" id="qhint">Bir gap bilan yozing yoki 🎤 bilan ayting: <b>nima uchun · qancha · qaysi hisobdan</b>. Ilova o'zi to'ldiradi, siz faqat tekshirib saqlaysiz.</p>
     <div id="dueBox"></div>
+    <div id="lowBox"></div>
     <div class="actions">
       <button class="big exp" data-act="add-x">− Xarajat</button>
       <button class="big inc" data-act="add-t">+ Tushum</button>
       <button class="big tr" data-act="add-o" aria-label="O'tkazma">⇄</button>
     </div>
+    <div id="famBox"></div>
+    <div id="limBox"></div>
     <section class="card list" id="list"></section>
   </main>
 
   <main id="report" hidden></main>
   <main id="accounts" hidden></main>
+  <main id="gap" hidden></main>
   <main id="settings" hidden></main>
 
   <main id="add" hidden>
@@ -248,6 +275,7 @@ details.bar .det .kv.sub b{font-weight:600}
   <button data-tab="home">Asosiy</button>
   <button data-tab="report">Hisobot</button>
   <button data-tab="accounts">Hisoblar</button>
+  <button data-tab="gap" hidden>👭 Gap</button>
   <button data-tab="settings">Sozlamalar</button>
 </nav>
 <div id="toast" role="status"></div>
@@ -361,6 +389,10 @@ async function saveMonth(mk) {
   await store.del(extra);
 }
 
+const applyTheme = () => {
+  document.documentElement.dataset.preset = cfg.preset || "asosiy";
+  const gt = document.querySelector('#tabs [data-tab="gap"]'); if (gt) gt.hidden = !(cfg.preset === "ayol" || (cfg.gaps || []).length);
+};
 /* ================= KATEGORIYALAR ================= */
 const CAT = { FAMILY: "👨‍👩‍👧 Oila", CAR: "🚗 Mashina", BIZ: "📦 Biznes" };
 const FAM_ITEMS = ["Kiyim", "O'qish/kurs", "Dori-darmon", "Cho'ntak puli", "Ovqat/shirinlik", "Boshqa"];
@@ -385,7 +417,7 @@ function treeAyol(kind) {
     "🏠 Uy-ro'zg'or": ["Xo'jalik mollari", "Tozalash vositalari", "Idish-tovoq", "Uy bezaklari", "Maishiy texnika", "Boshqa"],
     [CAT.FAMILY]: fam,
     "💄 O'zim": ["Kiyim", "Poyabzal", "Kosmetika", "Parvarish (soch, tirnoq)", "Salon", "Sog'liq/dori", "Sport/fitnes", "Kurs/o'qish", "Aksessuar", "Boshqa"],
-    "🎁 Sovg'a va marosim": ["To'y", "Tug'ilgan kun", "Mehmondorchilik", "Hayit/bayram", "Boshqa"],
+    "🎁 Sovg'a va marosim": ["Gap (kafe)", "To'y", "Tug'ilgan kun", "Mehmondorchilik", "Hayit/bayram", "Boshqa"],
     "🚕 Transport": ["Taksi", "Jamoat transporti", "Boshqa"],
     "📱 Aloqa": ["Telefon", "Internet", "Obunalar", "Boshqa"],
     "💝 Xayriya": ["Sadaqa", "Boshqa"],
@@ -494,7 +526,7 @@ const monthEntries = () => DB[mkOf(view.y, view.m)] || [];
 
 function show(name) {
   screen = name;
-  ["home", "report", "accounts", "settings", "add"].forEach(id => $("#" + id).hidden = id !== name);
+  ["home", "report", "accounts", "gap", "settings", "add"].forEach(id => $("#" + id).hidden = id !== name);
   $("#monthBar").hidden = !(name === "home" || name === "report");
   $("#tabs").hidden = name === "add";
   $$("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === name));
@@ -503,7 +535,8 @@ function show(name) {
 }
 function render() {
   $("#monthTitle").textContent = `${MONTHS[view.m - 1]} ${view.y}`;
-  ({ home: renderHome, report: renderReport, accounts: renderAccounts, settings: renderSettings, add: renderAdd })[screen]();
+  applyTheme();
+  ({ home: renderHome, report: renderReport, accounts: renderAccounts, gap: renderGap, settings: renderSettings, add: renderAdd })[screen]();
 }
 
 function entryTitle(e) {
@@ -519,6 +552,22 @@ function renderHome() {
   $("#sumInc").textContent = fmt(inc); $("#sumExp").textContent = fmt(exp);
   $("#qhint").hidden = allEntries().length >= 15;
   $("#payNote").textContent = pay ? `Qarz/nasiya to'lovlari: ${fmt(pay)} so'm` : "";
+  const low = [];
+  const mute = cfg.muteStock || {};
+  for (const b of cfg.biz) for (const [n, p] of Object.entries(stock(b)))
+    if (p.inQ > 0 && p.left <= (cfg.lowStock ?? 3) && !(mute[b + "|" + n] >= p.inQ)) low.push([b, n, p.left, p.inQ]);
+  $("#lowBox").innerHTML = low.map(([b, n, l, iq]) => `<div class="due low"><span><b>${esc(n)}: ${l <= 0 ? "tugadi" : fmtN(l) + " ta qoldi"}</b><small>${esc(b)}: yangi buyurtma berish vaqti</small></span><button data-act="mute" data-key="${esc(b + "|" + n)}" data-in="${iq}" style="background:var(--bg2);color:var(--hint)">✕</button></div>`).join("");
+  const spent = {}, fam = {}; let me = 0;
+  E.forEach(e => { if (e.k !== "x") return; const v = uzsOf(e); spent[e.c] = (spent[e.c] || 0) + v;
+    if (e.c === CAT.FAMILY) fam[e.b || "Umumiy oila"] = (fam[e.b || "Umumiy oila"] || 0) + v;
+    if (e.c === "💄 O'zim") me += v; });
+  $("#famBox").innerHTML = cfg.preset === "ayol" && cfg.family.length
+    ? `<section class="card"><h2>Bu oy kimga qancha</h2><div class="tiles">${cfg.family.map(n => `<div class="tile">${esc(n)}<b>${fmt(fam[n] || 0)}</b></div>`).join("")}<div class="tile">O'zimga<b>${fmt(me)}</b></div></div></section>` : "";
+  const lims = Object.entries(cfg.limits || {}).filter(([, v]) => v > 0);
+  $("#limBox").innerHTML = lims.length ? `<section class="card"><h2>Oylik limitlar</h2>${lims.map(([c, v]) => {
+    const sp = spent[c] || 0, pct = sp / v * 100, cls = pct >= 100 ? "exp" : pct >= 80 ? "warn" : "inc";
+    return `<div class="lim"><div class="bl"><span>${esc(c)}</span><b>${fmt(sp)} <small>/ ${fmt(v)}</small></b></div><div class="track"><i class="${cls}" style="width:${Math.min(100, Math.max(2, pct))}%"></i></div><span class="lhint">${pct >= 100 ? `Limitdan ${fmt(sp - v)} oshdi` : `Qoldi: ${fmt(v - sp)} (${Math.round(pct)}% sarflandi)`}</span></div>`;
+  }).join("")}</section>` : "";
   $("#dueBox").innerHTML = dueList().map(d => `<div class="due${d.late ? " late" : ""}"><span><b>${esc(d.a.name)}: ${money(d.left, d.a.cur)}</b><small>${d.late ? "Muddati o'tgan" : "To'lov sanasi"}: ${d.date}</small></span><button data-act="pay" data-id="${esc(d.a.id)}">To'lash</button></div>`).join("");
   if (!E.length) { $("#list").innerHTML = `<p class="empty">Bu oyda hali yozuv yo'q. Yuqoridagi tugmalar bilan birinchisini qo'shing.</p>`; return; }
   let h = "", last = "";
@@ -642,10 +691,10 @@ function bizPL(E, biz) {
       <tr><td><b>Jami</b></td><td></td><td></td><td><b>${fmt(total)}</b></td></tr></tbody></table></div>` : ""}
     <p class="hint" style="margin:8px 0 0">Tovar xaridi xarajat emas, omborga tushgan aktiv. Tannarx sotilganda hisobdan chiqadi (o'rtacha narx bo'yicha, kargo va tamojnya bilan).</p></section>`;
 }
-const ACC_ICON = { card: "💳", cash: "💵", invest: "📈", asset: "🏷️", debt: "🧾", recv: "🤝" };
+const ACC_ICON = { card: "💳", cash: "💵", invest: "📈", asset: "🏷️", debt: "🧾", recv: "🤝", gap: "👭" };
 function renderAccounts() {
   const b = balances();
-  const groups = [["Pul", a => a.type === "card" || a.type === "cash"], ["Investitsiyalar", a => a.type === "invest"], ["Mulk", a => a.type === "asset"], ["Menga qarzdorlar", a => a.type === "recv"], ["Qarzlar va nasiya", a => a.type === "debt"]];
+  const groups = [["Pul", a => a.type === "card" || a.type === "cash"], ["Investitsiyalar", a => a.type === "invest"], ["Mulk", a => a.type === "asset"], ["Menga qarzdorlar", a => a.type === "recv"], ["Gap guruhlari", a => a.type === "gap"], ["Qarzlar va nasiya", a => a.type === "debt"]];
   let assets = 0, debts = 0, html = "";
   const bizStock = cfg.biz.map(b => [b, stockValue(b)]).filter(([, v]) => v > 0);
   if (bizStock.length) {
@@ -667,7 +716,7 @@ function renderAccounts() {
       }
       const valued = (a.type === "invest" || a.type === "asset") && a.val !== undefined && a.val !== null && a.val !== "";
       const cur = valued ? +a.val : bal;
-      assets += toUzs(cur, a.cur);
+      if (a.type === "gap" && cur < 0) debts += toUzs(-cur, a.cur); else assets += toUzs(cur, a.cur);
       html += `<div class="acc"><div class="top"><span>${ACC_ICON[a.type] || "💳"} ${esc(a.name)}</span><b class="${cur < 0 ? "neg" : ""}">${cur < 0 ? "−" : ""}${money(cur, a.cur)}</b></div>`;
       if (a.type === "invest" || a.type === "asset") {
         const diff = valued ? +a.val - bal : 0;
@@ -688,7 +737,7 @@ function renderAccounts() {
 }
 
 const rowInput = v => `<div class="irow"><input value="${esc(v)}" maxlength="40" placeholder="Nomi"><button data-act="delrow" aria-label="O'chirish">✕</button></div>`;
-const TYPES = [["card", "Karta"], ["cash", "Naqd"], ["invest", "Invest"], ["asset", "Mulk"], ["recv", "Menga qarzdor"], ["debt", "Qarz/nasiya"]];
+const TYPES = [["card", "Karta"], ["cash", "Naqd"], ["invest", "Invest"], ["asset", "Mulk"], ["recv", "Menga qarzdor"], ["gap", "Gap"], ["debt", "Qarz/nasiya"]];
 const accRow = a => {
   const debt = a.type === "debt", ov = debt ? -(+a.open || 0) : (+a.open || 0);
   return `<div class="arow" data-id="${esc(a.id)}">
@@ -711,7 +760,7 @@ function renderSettings() {
         <option value="0"${(cfg.remind?.hour ?? 21) === 0 ? " selected" : ""}>O'chirilgan</option>
         ${Array.from({ length: 18 }, (_, i) => i + 6).map(h => `<option value="${h}"${(cfg.remind?.hour ?? 21) === h ? " selected" : ""}>${pad(h)}:00</option>`).join("")}
       </select></div>
-      <label class="kv" style="align-items:center"><span>Qarz/nasiya to'lov kunlarida eslatish</span><input type="checkbox" id="remPay"${cfg.remind?.pay === false ? "" : " checked"} style="width:20px;height:20px"></label>
+      <label class="kv" style="align-items:center"><span>Qarz/nasiya to'lovi va gap kunlarida eslatish</span><input type="checkbox" id="remPay"${cfg.remind?.pay === false ? "" : " checked"} style="width:20px;height:20px"></label>
       <button class="secondary" data-act="remind" style="margin-top:8px;background:var(--bg2)">Saqlash va botga yuborish</button>
       <p class="hint" style="margin:6px 0 0">Bot chati ochiladi. «Start» yoki «Запустить» tugmasi chiqsa, bosing. Bot bir soat ichida tasdiq xabarini yuboradi.</p></section>
     <section class="card"><h2>Kategoriyalar shabloni</h2><select id="preset" style="width:100%;border:0;border-radius:9px;background:var(--bg2);padding:9px 10px">${Object.entries(PRESETS).map(([k, l]) => `<option value="${k}"${(cfg.preset || "asosiy") === k ? " selected" : ""}>${l}</option>`).join("")}</select></section>
@@ -724,7 +773,10 @@ function renderSettings() {
     <section class="card"><h2>Mashinalar</h2><div id="carList">${cfg.cars.map(rowInput).join("")}</div>
       <button class="link" data-act="addrow" data-to="carList">+ Mashina qo'shish</button></section>
     <section class="card"><h2>Bizneslar</h2><div id="bizList">${cfg.biz.map(rowInput).join("")}</div>
-      <button class="link" data-act="addrow" data-to="bizList">+ Biznes qo'shish</button></section>
+      <button class="link" data-act="addrow" data-to="bizList">+ Biznes qo'shish</button>
+      <div class="kv" style="align-items:center;margin-top:8px"><span>Tovar kam qolganda ogohlantirish (dona)</span><input id="lowStock" class="limin" style="width:70px" inputmode="numeric" value="${cfg.lowStock ?? 3}"></div></section>
+    <section class="card"><h2>Oylik limitlar</h2><p class="hint" style="margin:-4px 0 8px">Har bir kategoriya uchun oyiga qancha sarflashni rejalashtirsangiz, shuni yozing. Bo'sh qolsa, limit yo'q.</p>
+      ${Object.keys(tree("x")).filter(c => c !== CAT.BIZ).map(c => `<div class="kv" style="align-items:center"><span>${esc(c)}</span><input class="limin" data-cat="${esc(c)}" inputmode="numeric" value="${cfg.limits?.[c] ? fmt(cfg.limits[c]) : ""}" placeholder="—"></div>`).join("")}</section>
     <button class="primary" data-act="savecfg">Saqlash</button>
     <p class="hint">Nomni o'zgartirsangiz, eski yozuvlar eski nomi bilan qoladi.</p>
     <section class="card" style="margin-top:14px"><h2>Import</h2>
@@ -745,8 +797,10 @@ async function saveCfg() {
     return { ...old, id: r.dataset.id, name: r.querySelector(".an").value.trim(), cur: r.querySelector(".ac").value, type, open: type === "debt" ? -ov : ov,
       monthly: parseNum(r.querySelector(".am").value), day: dd >= 1 && dd <= 31 ? dd : 0, car: r.querySelector(".acar").value, start: r.querySelector(".as").value };
   }).filter(a => a.name);
-  const next = { ...cfg, preset: $("#preset").value, rate: parseNum($("#rate").value) || cfg.rate, accounts, family: read("famList"), cars: read("carList"), biz: read("bizList") };
-  const prev = cfg; cfg = next;
+  const limits = {}; $$(".limin[data-cat]").forEach(i => { const v = parseNum(i.value); if (v > 0) limits[i.dataset.cat] = v; });
+  const ls = parseInt($("#lowStock")?.value, 10);
+  const next = { ...cfg, limits, lowStock: ls >= 0 ? ls : (cfg.lowStock ?? 3), preset: $("#preset").value, rate: parseNum($("#rate").value) || cfg.rate, accounts, family: read("famList"), cars: read("carList"), biz: read("bizList") };
+  const prev = cfg; cfg = next; applyTheme();
   try { await saveCfgStore(); haptic("success"); toast("Saqlandi"); renderSettings(); }
   catch (e) { cfg = prev; toast("Saqlab bo'lmadi. Internetni tekshirib, qayta urinib ko'ring."); }
 }
@@ -759,12 +813,88 @@ async function saveVal(id) {
   catch (e) { a.val = prev; toast("Saqlab bo'lmadi."); }
 }
 
+/* ================= GAP ================= */
+const ymNow = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; };
+const monthAdd = (ym, k) => { let [y, m] = ym.split("-").map(Number); m += k; y += Math.floor((m - 1) / 12); m = ((m - 1) % 12 + 12) % 12 + 1; return `${y}-${pad(m)}`; };
+const monthLabel = ym => `${MONTHS[+ym.slice(5, 7) - 1]} ${ym.slice(0, 4)}`;
+function gapInfo(g) {
+  const n = g.members.length, meIdx = g.members.findIndex(x => norm(x) === "men"), ym = ymNow(), today = new Date().getDate();
+  const rounds = g.members.map((name, i) => {
+    const month = monthAdd(g.start, i), E = DB[month.replace("-", "_")] || [];
+    const paid = E.filter(e => e.k === "o" && e.to === g.acc).reduce((s, e) => s + (e.a2 ?? e.a), 0);
+    const got = E.filter(e => e.k === "o" && e.acc === g.acc).reduce((s, e) => s + e.a, 0);
+    const me = i === meIdx, done = me ? got > 0 : paid > 0;
+    const past = month < ym || (month === ym && today > g.day);
+    return { i, name, month, paid, got, me, done, past };
+  });
+  const next = rounds.find(r => !r.done);
+  return { n, meIdx, rounds, next, recv: g.amt * (n - 1) };
+}
+function renderGap() {
+  const b = balances(); let h = "";
+  for (const g of cfg.gaps || []) {
+    const I = gapInfo(g), nx = I.next, bal = b[g.acc] || 0;
+    const nextHtml = !nx ? `<div class="gnext">✅ Gap aylanmasi yakunlandi</div>`
+      : nx.me ? `<div class="gnext me">🎉 <b>${monthLabel(nx.month)}, ${g.day}-sana: sizning navbatingiz!</b><br>Olasiz: <b>${money(I.recv, g.cur)}</b>${nx.past ? "<br>⚠️ Sana o'tdi, olgan bo'lsangiz kiriting" : ""}</div>`
+      : `<div class="gnext">📅 <b>${monthLabel(nx.month)}, ${g.day}-sana</b><br>Navbat: <b>${esc(nx.name)}</b>. Siz berasiz: <b>${money(g.amt, g.cur)}</b>${nx.past ? "<br>⚠️ Sana o'tdi, bergan bo'lsangiz kiriting" : ""}</div>`;
+    const btn = !nx ? "" : nx.me ? `<button class="primary" data-act="gapget" data-id="${esc(g.id)}">Pulni oldim</button>` : `<button class="primary" data-act="gappay" data-id="${esc(g.id)}">Pulni berdim</button>`;
+    const rows = I.rounds.map(r => `<div class="grow${r.me ? " me" : ""}"><span>${monthLabel(r.month)}</span><span>${esc(r.name)}${r.me ? " (siz)" : ""}</span><b>${r.done ? "✅" : r.past ? "⚠️" : "○"}</b></div>`).join("");
+    const balTxt = Math.abs(bal) < 0.01 ? "Hisob teng." : bal > 0 ? `Guruh sizga qarzdor: <b>${money(bal, g.cur)}</b> (navbatingizda qaytadi).` : `Siz guruhga qarzdorsiz: <b>${money(-bal, g.cur)}</b> (keyingi oylarda berasiz).`;
+    h += `<section class="card"><div class="gtitle"><h2>👭 ${esc(g.name)}</h2><button class="gdel" data-act="gapdel" data-id="${esc(g.id)}" aria-label="O'chirish">✕</button></div>
+      <p class="hint" style="margin:-4px 0 10px">${money(g.amt, g.cur)} dan, har oy ${g.day}-sanada, ${I.n} kishi. Sizning navbatingiz: ${monthLabel(monthAdd(g.start, I.meIdx))}</p>
+      ${nextHtml}${btn}<p class="hint" style="margin:10px 0 6px">${balTxt}</p>
+      <details class="gtl"><summary>Navbatlar jadvali</summary>${rows}</details></section>`;
+  }
+  if (!(cfg.gaps || []).length) h += `<section class="card"><p class="empty">Hali gap qo'shilmagan. Dugonalar, sinfdoshlar yoki qarindoshlar bilan o'ynaydigan gapingizni qo'shing: kimning navbati qachonligi, kimga qancha berganingiz va qachon o'zingiz olishingiz shu yerda ko'rinib turadi.</p></section>`;
+  h += `<section class="card gform" id="gapForm" hidden><h2>Yangi gap</h2>
+      <input id="gName" maxlength="40" placeholder="Nomi: masalan, Dugonalar">
+      <div class="two"><input id="gAmt" inputmode="decimal" placeholder="Har kim beradi"><select id="gCur"><option value="USD">$ dollar</option><option value="UZS">so'm</option></select></div>
+      <div class="two"><input id="gDay" inputmode="numeric" placeholder="Har oy nechanchi sana"><input id="gStart" type="month" value="${ymNow()}" title="Birinchi yig'ilish oyi"></div>
+      <textarea id="gMembers" rows="6" placeholder="Navbat tartibida, har qatorda bitta ism.\nO'zingizni «Men» deb yozing.\n\nMalika\nMen\nNodira"></textarea>
+      <button class="primary" data-act="gapsave">Saqlash</button></section>
+    <button class="secondary" data-act="gapnew">+ Yangi gap qo'shish</button>
+    <p class="hint">Gapga bergan pulingiz xarajat emas: navbatingizda o'zingizga qaytadi, shuning uchun oy natijasini buzmaydi. Kafedagi ovqat xarajatini alohida yozing: <b>Sovg'a va marosim → Gap (kafe)</b>.</p>`;
+  $("#gap").innerHTML = h;
+}
+async function gapSave() {
+  const name = $("#gName").value.trim(), amt = parseNum($("#gAmt").value), cur = $("#gCur").value;
+  const day = parseInt($("#gDay").value, 10), start = $("#gStart").value;
+  const members = $("#gMembers").value.split(/\n+/).map(x => x.trim()).filter(Boolean);
+  if (!name) return toast("Gap nomini yozing");
+  if (!(amt > 0)) return toast("Har kim qancha berishini yozing");
+  if (!(day >= 1 && day <= 31)) return toast("Yig'ilish sanasini yozing (1–31)");
+  if (!start) return toast("Birinchi yig'ilish oyini tanlang");
+  if (members.length < 2) return toast("Kamida 2 kishi bo'lishi kerak");
+  if (members.filter(x => norm(x) === "men").length !== 1) return toast("Ro'yxatda o'zingizni bir marta «Men» deb yozing");
+  const acc = { id: uid(), name: `Gap: ${name}`, cur, type: "gap", open: 0 };
+  const g = { id: uid(), name, amt, cur, day, start, members, acc: acc.id };
+  cfg.accounts.push(acc); (cfg.gaps = cfg.gaps || []).push(g);
+  try { await saveCfgStore(); haptic("success"); toast("Gap qo'shildi"); render(); }
+  catch (e) { cfg.accounts = cfg.accounts.filter(a => a !== acc); cfg.gaps = cfg.gaps.filter(x => x !== g); toast("Saqlab bo'lmadi"); }
+}
+function gapPay(id, get) {
+  const g = (cfg.gaps || []).find(x => x.id === id); if (!g) return;
+  const I = gapInfo(g), nx = I.next;
+  openAdd("o", true);
+  if (get) {
+    selectFrom(g.acc);
+    $("#amt").value = cleanNum(String(I.recv), true); syncAmt();
+    $("#note").value = `Gap: ${g.name}, mening navbatim`;
+  } else {
+    draft.to = g.acc; draft.payAmt = g.amt;
+    $("#note").value = `Gap: ${g.name}${nx ? ", " + nx.name + "ga" : ""}`;
+  }
+  if (nx) $("#date").value = `${nx.month}-${pad(Math.min(g.day, 28))}`;
+  renderAdd();
+  toast(get ? "Pul tushgan hisobni «Qayerga» qismidan tanlang" : "Qaysi hisobdan berganingizni tanlang");
+}
 const BOT_USERNAME = "subfinancebot";
 function sendRemind() {
   const h = +$("#remHour").value, pay = $("#remPay").checked;
   const days = pay ? [...new Set(cfg.accounts.filter(a => a.type === "debt" && a.day && (-(balances()[a.id] || 0) > 0.001)).map(a => a.day))] : [];
   cfg.remind = { hour: h, pay }; saveCfgStore().catch(() => {});
-  const link = `https://t.me/${BOT_USERNAME}?start=e${h}${days.map(d => "p" + d).join("")}`;
+  const gdays = pay ? [...new Set((cfg.gaps || []).map(g => g.day))] : [];
+  const link = `https://t.me/${BOT_USERNAME}?start=e${h}${days.map(d => "p" + d).join("")}${gdays.map(d => "g" + d).join("")}`;
   if (inTg && tg.openTelegramLink) tg.openTelegramLink(link); else window.open(link, "_blank");
 }
 async function resetAll() {
@@ -789,7 +919,7 @@ function openAdd(kind, noFocus) {
   const now = new Date();
   const same = now.getFullYear() === view.y && now.getMonth() + 1 === view.m;
   const last = accById(cfg.lastAcc);
-  draft = { kind, path: [], acc: kind === "o" ? "" : (last ? last.id : ""), from: "", to: "", cur: last && kind !== "o" ? last.cur : "UZS", a2s: "", item: "", q: 0 };
+  draft = { kind, path: [], acc: kind === "o" ? "" : (last ? last.id : ""), from: "", to: "", cur: last && kind !== "o" ? last.cur : "UZS", a2s: "", item: "", q: 0, amtTouched: false };
   $("#amt").value = ""; $("#note").value = ""; $("#itemNew").value = ""; $("#qty").value = "";
   $("#date").value = same ? todayStr() : `${view.y}-${pad(view.m)}-01`;
   show("add");
@@ -865,6 +995,11 @@ function renderItem() {
   else if (mode === ITEM_IN) hint = "Summa: shu partiya uchun to'langan pul. Kargo alohida to'langan bo'lsa, uni \"Kargo/tamojnya\" bilan shu mahsulotga kiriting.";
   else if (mode === ITEM_CARGO) hint = "Bu summa tanlangan mahsulot tannarxiga qo'shiladi.";
   else if (p) hint = `Omborda: ${fmtN(p.left)} dona, tannarx ${fmt(p.avg)} so'm/dona.` + (mode === ITEM_OWN ? " Summa tannarx bo'yicha o'zi hisoblanadi." : "");
+  const price = mode === ITEM_SALE && d.item ? cfg.prices?.[d.path[1]]?.[d.item] : 0;
+  if (price) {
+    hint += ` Sotuv narxi: ${fmt(price)} so'm/dona.`;
+    if (d.q > 0 && !d.amtTouched) $("#amt").value = cleanNum(String(Math.round(price * d.q)), true);
+  }
   if (mode === ITEM_SALE && p && d.q > p.left) hint += " Diqqat: omborda buncha tovar yo'q.";
   $("#itemHint").textContent = hint;
   if (mode === ITEM_OWN && p && d.q > 0) $("#amt").value = cleanNum(String(Math.round(p.avg * d.q)), true);
@@ -906,7 +1041,10 @@ async function saveEntry() {
   $("#save").disabled = true;
   try {
     await enqueue(() => saveMonth(mk));
-    if (d.kind !== "o" && cfg.lastAcc !== d.acc) { cfg.lastAcc = d.acc; saveCfgStore().catch(() => {}); }
+    let cfgDirty = false;
+    if (d.kind !== "o" && cfg.lastAcc !== d.acc) { cfg.lastAcc = d.acc; cfgDirty = true; }
+    if (e.item && e.q > 0 && e.s === ITEM_SALE) { cfg.prices = cfg.prices || {}; (cfg.prices[e.b] = cfg.prices[e.b] || {})[e.item] = Math.round(uzsOf(e) / e.q); cfgDirty = true; }
+    if (cfgDirty) saveCfgStore().catch(() => {});
     haptic("success"); toast("Saqlandi");
     view = { y: +date.slice(0, 4), m: +date.slice(5, 7) };
     show("home");
@@ -1014,7 +1152,7 @@ async function doImport() {
     (DB[mk] = DB[mk] || []).push(e); touched.add(mk); added++;
   }
   try {
-    cfg = newCfg;
+    cfg = newCfg; applyTheme();
     await saveCfgStore();
     for (const mk of touched) await enqueue(() => saveMonth(mk));
     $("#imp").value = "";
@@ -1104,6 +1242,15 @@ function parseQuick(text) {
     }
   });
   const fixCur = a => { if (isUsd && a.cur !== "USD") { const alt = cfg.accounts.find(x => x.cur === "USD" && awords(x.name)[0] === awords(a.name)[0]); return alt || a; } return a; };
+  // gap
+  const gapHit = (cfg.gaps || []).length && ctoks.some(t => t.startsWith("gap"));
+  if (gapHit) {
+    const g = cfg.gaps.find(x => words(x.name).some(w => ctoks.some(t => t.startsWith(w)))) || cfg.gaps[0];
+    const payer = accHits.find(h => ["card", "cash", "invest", "recv"].includes(h.a.type));
+    const got = has(/^(oldim|oldi|navbatim|yigdim|tushdi|keldi)/);
+    return got ? { kind: "o", amount, cur: g.cur, from: g.acc, to: payer ? payer.a.id : "" }
+               : { kind: "o", amount, cur: g.cur, from: payer ? fixCur(payer.a).id : "", to: g.acc };
+  }
   // o'tkazma
   const moneyAcc = accHits.filter(h => !["asset"].includes(h.a.type));
   const payers = accHits.filter(h => ["card", "cash", "invest", "recv"].includes(h.a.type));
@@ -1158,14 +1305,14 @@ function applyQuick() {
   const r = parseQuick(text);
   openAdd(r.kind, true);
   const d = draft;
-  if (r.kind === "o") { d.to = r.to; selectFrom(r.from); }
+  if (r.kind === "o") { d.to = r.to; if (r.from) selectFrom(r.from); }
   else {
     if (r.acc) { d.acc = r.acc; d.cur = accById(r.acc).cur; } else if (r.cur === "USD") { d.acc = ""; d.cur = "USD"; }
     d.path = r.path || [];
     if (r.item) d.item = r.item;
     if (r.q) { d.q = r.q; $("#qty").value = String(r.q); }
   }
-  if (r.amount) $("#amt").value = cleanNum(String(r.amount), true);
+  if (r.amount) { $("#amt").value = cleanNum(String(r.amount), true); d.amtTouched = true; }
   $("#note").value = text;
   syncAmt(); renderAdd();
   $("#quick").value = "";
@@ -1221,10 +1368,31 @@ document.addEventListener("click", ev => {
   if (a === "import") return doImport();
   if (a === "reset") return resetAll();
   if (a === "remind") return sendRemind();
+  if (a === "gapnew") { $("#gapForm").hidden = false; t.hidden = true; $("#gName").focus(); return; }
+  if (a === "gapsave") return gapSave();
+  if (a === "gappay") return gapPay(t.dataset.id, false);
+  if (a === "gapget") return gapPay(t.dataset.id, true);
+  if (a === "gapdel") {
+    const g = (cfg.gaps || []).find(x => x.id === t.dataset.id);
+    ask(`«${g.name}» gapini o'chiraymi? Kiritilgan to'lov yozuvlari saqlanib qoladi.`).then(ok => {
+      if (!ok) return;
+      cfg.gaps = cfg.gaps.filter(x => x !== g); cfg.accounts = cfg.accounts.filter(x => x.id !== g.acc);
+      saveCfgStore().catch(() => {}); render();
+    });
+    return;
+  }
+  if (a === "mute") {
+    ask("Bu mahsulot haqida boshqa ogohlantirmaylikmi? Yangi partiya kiritsangiz, ogohlantirish yana yoqiladi.").then(ok => {
+      if (!ok) return;
+      cfg.muteStock = cfg.muteStock || {}; cfg.muteStock[t.dataset.key] = +t.dataset.in;
+      saveCfgStore().catch(() => {}); render();
+    });
+    return;
+  }
   if (a === "quick") return applyQuick();
 });
 document.addEventListener("input", ev => {
-  if (ev.target.id === "amt") { syncAmt(); updateSave(); }
+  if (ev.target.id === "amt") { draft.amtTouched = true; syncAmt(); updateSave(); }
   if (ev.target.id === "itemNew") { draft.item = ev.target.value.trim(); $$("#itemChips .chip").forEach(c => c.classList.toggle("on", c.dataset.item === draft.item)); renderItem(); updateSave(); }
   if (ev.target.id === "qty") { draft.q = parseNum(ev.target.value); renderItem(); updateSave(); }
   if (ev.target.id === "amt2") {
@@ -1255,6 +1423,7 @@ if (ver("6.1")) tg.BackButton.onClick(() => show("home"));
   try { await load(); }
   catch (e) { $("#loading").textContent = "Ma'lumotlarni yuklab bo'lmadi. Ilovani yopib, qayta oching."; return; }
   $("#loading").remove();
+  applyTheme();
   show("home");
 })();
 </script>
