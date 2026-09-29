@@ -200,6 +200,46 @@ details.bar .det .kv.sub b{font-weight:600}
 .lock h2{margin-bottom:6px}
 .pstat{background:var(--bg2);border-radius:12px;padding:12px 14px;margin-bottom:10px;font-weight:600}
 .pstat small{display:block;font-weight:400;color:var(--hint);margin-top:2px}
+.onb{padding:8px 4px 20px}
+.onb .dots{display:flex;gap:6px;justify-content:center;margin:6px 0 18px}
+.onb .dots i{width:8px;height:8px;border-radius:4px;background:var(--line)}
+.onb .dots i.on{background:var(--accent);width:22px}
+.onb .hero{font-size:44px;text-align:center;margin:8px 0 4px}
+.onb h1{font-size:22px;text-align:center;margin:0 0 6px}
+.onb .sub{text-align:center;color:var(--hint);margin:0 0 18px}
+.opt{display:block;width:100%;text-align:left;background:var(--bg);border-radius:14px;padding:14px 16px;margin-bottom:10px;border:2px solid transparent}
+.opt b{display:block;font-size:16px}
+.opt small{color:var(--hint)}
+.opt.on{border-color:var(--accent)}
+.onb .chips{flex-wrap:wrap;overflow:visible}
+.obal{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:12px;padding:8px 12px;margin-bottom:8px}
+.obal span{flex:1}
+.obal input{width:140px;text-align:right;border:0;border-radius:9px;background:var(--bg2);padding:9px 10px;outline:none}
+.oin{width:100%;border:0;border-radius:12px;background:var(--bg);padding:12px 14px;outline:none;margin-bottom:10px}
+.tip{display:flex;gap:12px;background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:8px;align-items:flex-start}
+.tip b{font-size:20px;line-height:1.2}
+.onb .row2{display:flex;gap:8px;margin-top:6px}
+.onb .row2 button{flex:1}
+.art{text-align:left;border-radius:20px;padding:18px 16px;margin:0 0 16px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 22%,var(--bg)),color-mix(in srgb,var(--tr) 16%,var(--bg)));min-height:190px;display:flex;flex-direction:column;justify-content:center;gap:8px}
+@supports not (background:color-mix(in srgb,red 10%,blue)){.art{background:var(--bg)}}
+.mk{background:var(--bg);border-radius:12px;padding:10px 12px;font-size:13.5px;box-shadow:0 2px 10px rgba(0,0,0,.06);display:flex;justify-content:space-between;gap:8px;align-items:center}
+.mk small{color:var(--hint)}
+.mk.pill{border-radius:22px;justify-content:flex-start}
+.mk.me{border:2px solid var(--accent)}
+.mk.warn{border-left:4px solid #e0a030}
+.mk .bar2{flex:1;height:7px;border-radius:4px;background:var(--bg2);overflow:hidden}
+.mk .bar2 i{display:block;height:100%;border-radius:4px}
+.arrow{text-align:center;color:var(--hint);font-size:18px;line-height:1}
+.bub{background:var(--bg);border-radius:14px 14px 14px 4px;padding:10px 12px;font-size:13.5px;max-width:88%;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.pbadge{display:inline-block;background:linear-gradient(135deg,#f5b642,#e07b39);color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:12px;margin:0 auto 8px}
+.slide{text-align:center}
+.slide h1{margin-top:2px}
+.feat{list-style:none;padding:0;margin:0 0 14px;text-align:left}
+.feat li{background:var(--bg);border-radius:10px;padding:9px 12px;margin-bottom:6px;font-size:14px}
+.sdots{display:flex;gap:5px;justify-content:center;margin:0 0 12px}
+.sdots i{width:6px;height:6px;border-radius:3px;background:var(--line)}
+.sdots i.on{background:var(--accent)}
+.trialbox{background:linear-gradient(135deg,rgba(245,182,66,.18),rgba(224,123,57,.14));border-radius:14px;padding:14px;margin:4px 0 12px;font-size:14px;line-height:1.5}
 #toast{position:fixed;left:50%;bottom:84px;transform:translate(-50%,20px);background:rgba(20,20,24,.9);color:#fff;padding:9px 16px;border-radius:20px;font-size:14px;opacity:0;pointer-events:none;transition:.2s;z-index:9;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 #loading{text-align:center;color:var(--hint);padding:60px 20px}
@@ -243,6 +283,7 @@ details.bar .det .kv.sub b{font-weight:600}
   <main id="report" hidden></main>
   <main id="accounts" hidden></main>
   <main id="gap" hidden></main>
+  <main id="onb" hidden></main>
   <main id="settings" hidden></main>
 
   <main id="add" hidden>
@@ -345,14 +386,8 @@ const store = (() => {
 })();
 
 const DEF_ACCOUNTS = [
-  { id: "uzum", name: "Uzum karta", cur: "UZS", type: "card", open: 0 },
-  { id: "ipak", name: "Ipak Yo'li karta", cur: "UZS", type: "card", open: 0 },
-  { id: "kapital", name: "Kapital karta", cur: "UZS", type: "card", open: 0 },
   { id: "naqd", name: "Naqd so'm", cur: "UZS", type: "cash", open: 0 },
-  { id: "naqdusd", name: "Naqd dollar", cur: "USD", type: "cash", open: 0 },
-  { id: "yandex", name: "Yandex balans", cur: "UZS", type: "card", open: 0 },
-  { id: "imon", name: "Imon Invest", cur: "UZS", type: "invest", open: 0 },
-  { id: "binance", name: "Binance (USDT)", cur: "USD", type: "invest", open: 0 }
+  { id: "karta", name: "Karta", cur: "UZS", type: "card", open: 0 }
 ];
 let cfg = { family: [], cars: [], biz: [], accounts: DEF_ACCOUNTS, rate: 12500, lastAcc: "" };
 let idx = {}, DB = {};
@@ -535,9 +570,9 @@ const monthEntries = () => DB[mkOf(view.y, view.m)] || [];
 
 function show(name) {
   screen = name;
-  ["home", "report", "accounts", "gap", "settings", "add"].forEach(id => $("#" + id).hidden = id !== name);
+  ["home", "report", "accounts", "gap", "settings", "add", "onb"].forEach(id => $("#" + id).hidden = id !== name);
   $("#monthBar").hidden = !(name === "home" || name === "report");
-  $("#tabs").hidden = name === "add";
+  $("#tabs").hidden = name === "add" || name === "onb";
   $$("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === name));
   if (ver("6.1")) name === "add" ? tg.BackButton.show() : tg.BackButton.hide();
   render(); window.scrollTo(0, 0);
@@ -545,7 +580,7 @@ function show(name) {
 function render() {
   $("#monthTitle").textContent = `${MONTHS[view.m - 1]} ${view.y}`;
   applyTheme();
-  ({ home: renderHome, report: renderReport, accounts: renderAccounts, gap: renderGap, settings: renderSettings, add: renderAdd })[screen]();
+  ({ home: renderHome, report: renderReport, accounts: renderAccounts, gap: renderGap, settings: renderSettings, add: renderAdd, onb: renderOnb })[screen]();
 }
 
 function entryTitle(e) {
@@ -772,6 +807,10 @@ function renderSettings() {
   const P = isPremium();
   $("#settings").innerHTML = `
     ${premiumCard()}
+    <section class="card"><h2>❓ Yordam</h2>
+      <p class="hint" style="margin:-4px 0 10px">Qo'llanma va savollar botda. Savolingizni oddiy tilda yozsangiz, yordamchi javob beradi.</p>
+      <button class="secondary" data-act="helpbot" style="background:var(--bg2)">📖 Qo'llanma va savol berish</button>
+      <button class="link" data-act="onbstart" style="width:100%;text-align:center">Boshlang'ich sozlashni qayta o'tish</button></section>
     ${!P ? lockCard("Eslatmalar", "Kunlik eslatma, qarz/nasiya va gap kunlaridagi eslatmalar Premium'da ishlaydi.") : `<section class="card"><h2>🔔 Eslatmalar</h2>
       <div class="kv" style="align-items:center"><span>Kunlik eslatma</span><select id="remHour" style="border:0;border-radius:9px;background:var(--bg2);padding:8px 10px">
         <option value="0"${(PLAN.remind?.hour ?? cfg.remind?.hour ?? 21) === 0 ? " selected" : ""}>O'chirilgan</option>
@@ -829,6 +868,110 @@ async function saveVal(id) {
   a.val = raw === "" ? null : parseNum(raw);
   try { await saveCfgStore(); haptic("success"); toast("Yangilandi"); renderAccounts(); }
   catch (e) { a.val = prev; toast("Saqlab bo'lmadi."); }
+}
+
+/* ================= BIRINCHI KIRISH ================= */
+const ONB_SUGGEST = [
+  ["Naqd so'm", "UZS", "cash"], ["Naqd dollar", "USD", "cash"], ["Uzcard", "UZS", "card"], ["Humo", "UZS", "card"],
+  ["Visa", "UZS", "card"], ["Uzum karta", "UZS", "card"], ["Click hamyon", "UZS", "card"], ["Payme hamyon", "UZS", "card"]
+];
+let onb = null;
+function startOnb() {
+  const sel = {};
+  cfg.accounts.filter(a => a.type === "cash" || a.type === "card").forEach(a => sel[a.name] = { id: a.id, cur: a.cur, type: a.type, open: a.open || 0 });
+  onb = { step: 0, slide: 0, preset: cfg.preset || "asosiy", sel, extra: cfg.accounts.filter(a => !(a.type === "cash" || a.type === "card")), family: cfg.family.join(", ") };
+  show("onb");
+}
+const SLIDES = {
+  quick: { t: "Bir gap bilan yozing", d: "Xarajatni kiritish 3 soniya: gapiring yoki qisqa yozing, ilova summani, kategoriyani va kartani o'zi aniqlaydi.", free: true,
+    art: `<div class="mk pill">🎤&nbsp; <i>non 12000 naqd</i></div><div class="arrow">↓</div>
+      <div class="mk"><span>🛒 Oziq-ovqat › Non<br><small>Naqd so'm</small></span><b>−12 000</b></div>
+      <div class="mk"><span>🚗 Mashina › Yoqilg'i<br><small>Uzcard</small></span><b>−150 000</b></div>`,
+    f: ["O'zbek va rus tilida tushunadi", "«150 ming», «bir yarim million» kabi so'zlarni ham"] },
+  biz: { t: "Biznesingiz foydasi aniq", d: "Sotayotgan tovarlaringiz: omborda nechta qoldi, har biri necha pulga tushdi, qancha foyda qilyapsiz.",
+    art: `<div class="mk"><span>📦 ASD svecha<br><small>Omborda: 17 dona</small></span><b style="color:var(--inc)">+30 000</b></div>
+      <div class="mk"><span>📦 Venatura D3K2<br><small>Tannarx: 52 035 / dona</small></span><b style="color:var(--inc)">+131 859</b></div>
+      <div class="mk warn"><span>⚠️ Mag-ThreeOn: <b>1 ta qoldi</b><br><small>Yangi buyurtma berish vaqti</small></span></div>`,
+    f: ["Sotuvda narx o'zi qo'yiladi", "Kargo va tamojnya tannarxga qo'shiladi", "Kam qolgan tovar haqida ogohlantirish"] },
+  gap: { t: "Gap: hammasi bir joyda", d: "Kimning navbati, kimga qancha berdingiz, o'z navbatingiz qachon: ilova eslab turadi va gap kuni eslatadi.",
+    art: `<div class="mk"><span>Sentyabr · Malika</span><b>✅</b></div>
+      <div class="mk me"><span>🎉 Oktyabr · <b>Sizning navbatingiz</b></span><b>$300</b></div>
+      <div class="mk"><span>Noyabr · Nodira</span><b>○</b></div>`,
+    f: ["Dugonalar, sinfdoshlar, qarindoshlar gaplari", "So'm yoki dollarda", "Gap puli oy natijasini buzmaydi"] },
+  debt: { t: "Qarz va nasiya nazoratda", d: "Nasiyaga olingan mashina, telefon yoki kredit: qancha qoldi, keyingi to'lov qachon, ilova vaqtida eslatadi.",
+    art: `<div class="mk"><span>🧾 Mashina nasiyasi<br><small>14 ta to'lov qoldi</small></span><b style="color:var(--exp)">$2 800</b></div>
+      <div class="mk me"><span>📅 10-oktabr: <b>$200</b></span><b style="color:var(--accent)">To'lash</b></div>
+      <div class="mk"><span>🚗 Mashina foydasi<br><small>Tushum − xarajat − nasiya</small></span><b style="color:var(--inc)">+334 015</b></div>`,
+    f: ["To'lov kuni botdan eslatma", "Mashina, biznes foydasi alohida hisobotda"] },
+  limits: { t: "Oylik limitlar", d: "Har bir kategoriyaga oylik reja qo'ying: ilova qancha qolganini va qachon oshib ketayotganingizni ko'rsatadi.",
+    art: `<div class="mk"><span style="width:90px">🛒 Oziq-ovqat</span><span class="bar2"><i style="width:90%;background:#e0a030"></i></span><small>90%</small></div>
+      <div class="mk"><span style="width:90px">💄 O'zim</span><span class="bar2"><i style="width:100%;background:var(--exp)"></i></span><small>105%</small></div>
+      <div class="mk"><span style="width:90px">🏠 Uy</span><span class="bar2"><i style="width:35%;background:var(--inc)"></i></span><small>35%</small></div>`,
+    f: ["Barcha oylar hisoboti va Excel'ga eksport", "Kategoriyani bossangiz, har bir xarajat ochiladi"] },
+  remind: { t: "Unutmaysiz", d: "Bot har kuni siz tanlagan vaqtda kirim-chiqimni eslatadi, gap va to'lov kunlarini ham.",
+    art: `<div class="bub">🌙 <b>Kun yakunlanyapti</b><br>Bugungi xarajatlarni kiritdingizmi?</div>
+      <div class="bub">👭 <b>Bugun gap kuni!</b></div>
+      <div class="bub">💳 <b>Bugun nasiya to'lov kuni:</b> $200</div>`,
+    f: ["Vaqtni o'zingiz tanlaysiz", "Bir marta bosish bilan ilovaga o'tasiz"] }
+};
+const slideList = () => onb.preset === "ayol" ? ["quick", "gap", "biz", "limits", "remind"] : ["quick", "biz", "debt", "limits", "remind"];
+function renderOnb() {
+  const o = onb, STEPS = 5, dots = `<div class="dots">${Array.from({ length: STEPS }, (_, i) => `<i class="${i === o.step ? "on" : ""}"></i>`).join("")}</div>`;
+  let h = "";
+  if (o.step === 0) h = `<div class="hero">👋</div><h1>Xush kelibsiz!</h1><p class="sub">SubFinance pulingiz qayerga ketayotganini ko'rsatadi: oila byudjeti, biznes, gap va qarzlar bir joyda.</p>
+    <div class="lab">Ilovani kim uchun sozlaymiz?</div>
+    <button class="opt${o.preset === "asosiy" ? " on" : ""}" data-onbp="asosiy"><b>👨‍👩‍👧 Umumiy</b><small>Oila, uy, mashina, ish va biznes xarajatlari</small></button>
+    <button class="opt${o.preset === "ayol" ? " on" : ""}" data-onbp="ayol"><b>👩 Ayollar uchun</b><small>Uy-ro'zg'or, bolalar, o'zim, gap va sovg'alar</small></button>
+    <button class="primary" data-act="onbnext" style="margin-top:6px">Davom etish</button>`;
+  if (o.step === 1) {
+    const L = slideList(), k = L[o.slide], S = SLIDES[k];
+    h = `<div class="slide">
+      <div class="sdots">${L.map((_, i) => `<i class="${i === o.slide ? "on" : ""}"></i>`).join("")}</div>
+      <div class="art">${S.art}</div>
+      ${S.free ? "" : `<span class="pbadge">💎 PREMIUM</span>`}
+      <h1>${S.t}</h1><p class="sub">${S.d}</p>
+      <ul class="feat">${S.f.map(x => `<li>✓ ${x}</li>`).join("")}</ul></div>
+      <div class="row2"><button class="secondary" data-act="onbskip">O'tkazib yuborish</button><button class="primary" data-act="onbslide">${o.slide < L.length - 1 ? "Keyingi" : "Sozlashga o'tish"}</button></div>`;
+  }
+  if (o.step === 2) {
+    const names = [...new Set([...ONB_SUGGEST.map(x => x[0]), ...Object.keys(o.sel)])];
+    h = `<div class="hero">💳</div><h1>Pulingiz qayerda turadi?</h1><p class="sub">Bor kartalaringiz va naqd pulingizni belgilang, hozirgi qoldig'ini yozing. Keyin o'zgartirish mumkin.</p>
+      <div class="chips" style="margin-bottom:12px">${names.map(n => `<button class="chip${o.sel[n] ? " on" : ""}" data-onba="${esc(n)}">${o.sel[n] ? "✓ " : ""}${esc(n)}</button>`).join("")}</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px"><input id="onbNew" class="oin" style="margin:0" maxlength="30" placeholder="Boshqa hisob nomi"><button class="secondary" data-act="onbadd" style="width:auto;padding:0 16px;margin:0">+</button></div>
+      ${Object.entries(o.sel).map(([n, a]) => `<div class="obal"><span>${esc(n)}</span><input data-onbo="${esc(n)}" inputmode="decimal" placeholder="Qoldiq, ${a.cur === "USD" ? "$" : "so'm"}" value="${a.open ? fmtN(a.open) : ""}"></div>`).join("")}
+      <div class="row2"><button class="secondary" data-act="onbback">Orqaga</button><button class="primary" data-act="onbnext">Davom etish</button></div>`;
+  }
+  if (o.step === 3) h = `<div class="hero">${o.preset === "ayol" ? "👧👦" : "👨‍👩‍👧"}</div><h1>Oila a'zolari</h1><p class="sub">Kimlarga pul sarflashingizni alohida ko'rmoqchi bo'lsangiz, ismlarini vergul bilan yozing.</p>
+    <input id="onbFam" class="oin" maxlength="200" placeholder="${o.preset === "ayol" ? "Masalan: Aziza, Sardor" : "Masalan: Onam, Malika, Aziz"}" value="${esc(o.family)}">
+    <p class="hint" style="margin:0 4px 10px">Bu ixtiyoriy. Keyin Sozlamalarda qo'shsa bo'ladi.</p>
+    <div class="row2"><button class="secondary" data-act="onbback">Orqaga</button><button class="primary" data-act="onbnext">Davom etish</button></div>`;
+  if (o.step === 4) {
+    const k = PLAN.kind, left = PLAN.until ? Math.max(0, Math.ceil((PLAN.until * 1000 - Date.now()) / 86400000)) : 0;
+    const box = k === "trial" ? `<div class="trialbox">🎁 <b>Sizga ${left} kunlik Premium sovg'a qilindi!</b><br>Shu kunlar davomida ${o.preset === "ayol" ? "gap, biznes va ombor" : "biznes va ombor, qarz va nasiya"}, oylik limitlar va eslatmalarni bemalol sinab ko'ring.</div>`
+      : k === "free" ? `<div class="trialbox">💎 Gap, biznes va ombor, limitlar va eslatmalar <b>Premium</b>'da: <b>Sozlamalar → Premium</b>.</div>` : "";
+    h = `<div class="hero">🎉</div><h1>Tayyor!</h1><p class="sub">Bir necha oddiy odat, va pulingiz nazoratda bo'ladi:</p>${box}
+    <div class="tip"><b>➖</b><span><b style="font-size:15px">Xarajat va tushum</b><br>Asosiy oynadagi tugmalar bilan kiriting: summa, hisob, kategoriya.</span></div>
+    <div class="tip"><b>🎤</b><span><b style="font-size:15px">Tez yozish</b><br>Bir gap bilan ayting: <i>«non 12000 naqd»</i>. Ilova o'zi to'ldiradi.</span></div>
+    <div class="tip"><b>⇄</b><span><b style="font-size:15px">O'tkazma</b><br>Kartadan naqdga yoki kartadan kartaga o'tkazma xarajat emas, uni ⇄ bilan yozing.</span></div>
+    <div class="tip"><b>💬</b><span><b style="font-size:15px">Yordam</b><br>Savol bo'lsa, botga oddiy tilda yozing, yordamchi javob beradi.</span></div>
+    <button class="primary" data-act="onbdone" style="margin-top:8px">Boshlash 🚀</button>`;
+  }
+  $("#onb").innerHTML = `<div class="onb">${dots}${h}</div>`;
+}
+function onbReadInputs() {
+  if (!onb) return;
+  $$("[data-onbo]").forEach(i => { const a = onb.sel[i.dataset.onbo]; if (a) a.open = parseNum(i.value); });
+  const f = $("#onbFam"); if (f) onb.family = f.value;
+}
+async function onbDone() {
+  onbReadInputs();
+  const accs = Object.entries(onb.sel).map(([name, a]) => ({ ...(cfg.accounts.find(x => x.id === a.id) || {}), id: a.id || uid(), name, cur: a.cur, type: a.type, open: a.open || 0 }));
+  if (!accs.length) accs.push({ id: uid(), name: "Naqd so'm", cur: "UZS", type: "cash", open: 0 });
+  const family = [...new Set(onb.family.split(/[,\n]+/).map(x => x.trim()).filter(x => x && x !== "Umumiy oila"))];
+  cfg = { ...cfg, preset: onb.preset, accounts: [...accs, ...onb.extra], family, onboarded: true, lastAcc: accs[0].id };
+  applyTheme(); onb = null;
+  try { await saveCfgStore(); } catch (e) { toast("Saqlab bo'lmadi, internetni tekshiring"); }
+  haptic("success"); show("home");
 }
 
 /* ================= GAP ================= */
@@ -1443,6 +1586,21 @@ document.addEventListener("click", ev => {
   if (a === "import") return doImport();
   if (a === "reset") return resetAll();
   if (a === "remind") return sendRemind();
+  if (t.dataset.onbp) { onb.preset = t.dataset.onbp; document.documentElement.dataset.preset = onb.preset; return renderOnb(); }
+  if (t.dataset.onba) {
+    onbReadInputs(); const n = t.dataset.onba;
+    if (onb.sel[n]) delete onb.sel[n];
+    else { const sgg = ONB_SUGGEST.find(x => x[0] === n) || [n, "UZS", "card"]; onb.sel[n] = { cur: sgg[1], type: sgg[2], open: 0 }; }
+    haptic("select"); return renderOnb();
+  }
+  if (a === "onbadd") { onbReadInputs(); const n = $("#onbNew").value.trim(); if (n && !onb.sel[n]) onb.sel[n] = { cur: /dollar|\$|usd/i.test(n) ? "USD" : "UZS", type: /naqd/i.test(n) ? "cash" : "card", open: 0 }; return renderOnb(); }
+  if (a === "onbnext") { onbReadInputs(); if (onb.step === 2 && !Object.keys(onb.sel).length) return toast("Kamida bitta hisobni belgilang"); onb.step++; window.scrollTo(0, 0); return renderOnb(); }
+  if (a === "onbslide") { if (onb.slide < slideList().length - 1) onb.slide++; else onb.step = 2; haptic("select"); window.scrollTo(0, 0); return renderOnb(); }
+  if (a === "onbskip") { onb.step = 2; window.scrollTo(0, 0); return renderOnb(); }
+  if (a === "onbback") { onbReadInputs(); onb.step--; if (onb.step === 1) onb.slide = slideList().length - 1; return renderOnb(); }
+  if (a === "onbdone") return onbDone();
+  if (a === "onbstart") return startOnb();
+  if (a === "helpbot") { const l = `https://t.me/${BOT_USERNAME}?start=help`; return inTg && tg.openTelegramLink ? tg.openTelegramLink(l) : window.open(l, "_blank"); }
   if (a === "gopremium") return goPremium();
   if (a === "paycard") return payCard();
   if (a === "paystars") return payStars();
@@ -1492,6 +1650,16 @@ document.addEventListener("change", ev => {
   r.readAsText(ev.target.files[0]);
 });
 $("#amt").addEventListener("keydown", ev => { if (ev.key === "Enter") ev.target.blur(); });
+let swX = null;
+$("#onb").addEventListener("touchstart", ev => { swX = onb && onb.step === 1 ? ev.touches[0].clientX : null; }, { passive: true });
+$("#onb").addEventListener("touchend", ev => {
+  if (swX === null || !onb) return;
+  const dx = ev.changedTouches[0].clientX - swX; swX = null;
+  if (Math.abs(dx) < 50) return;
+  if (dx < 0) { if (onb.slide < slideList().length - 1) onb.slide++; else onb.step = 2; }
+  else if (onb.slide > 0) onb.slide--; else onb.step = 0;
+  haptic("select"); renderOnb();
+}, { passive: true });
 $("#quick").addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); applyQuick(); } });
 if (ver("6.1")) tg.BackButton.onClick(() => show("home"));
 try { if (ver("8.0")) tg.onEvent("activated", async () => { await loadPlan(); render(); }); } catch (e) {}
@@ -1503,6 +1671,10 @@ try { if (ver("8.0")) tg.onEvent("activated", async () => { await loadPlan(); re
   catch (e) { $("#loading").textContent = "Ma'lumotlarni yuklab bo'lmadi. Ilovani yopib, qayta oching."; return; }
   $("#loading").remove();
   applyTheme();
+  if (!cfg.onboarded) {
+    if (allEntries().length || (cfg.gaps || []).length) { cfg.onboarded = true; saveCfgStore().catch(() => {}); }
+    else return startOnb();
+  }
   show("home");
 })();
 </script>
